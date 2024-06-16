@@ -1,0 +1,54 @@
+
+.animus-fade-in {
+    animation: fade-in 0.2s ease-in forwards;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.animus-fade-in-half {
+    animation: fade-in-half 0.2s ease-in forwards;
+}
+
+@keyframes fade-in-half {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 0.5;
+    }
+}
+
+.animus-fade-out {
+    animation: fade-out 0.2s ease-in forwards;
+
+
+}
+
+@keyframes fade-out {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+.animus-spin {
+    animation: rotate 1s linear infinite;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

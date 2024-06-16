@@ -1,0 +1,16 @@
+[package]
+name = "axum-quickstart"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.37.0", features = ["full"] }
+axum = { version = "0.7.5" }
+tower = { version = "0.4.13" }
+futures-util = { version = "0.3.30" }
+tower-http = { version = "0.5.2", features = ["full"] }
+serde = { version = "1.0.203", features = ["derive"] }
+dotenv = "0.15.0"
+dotenv_codegen = "0.15.0"
+time = "0.2"
+cookie = { version = "0.15" }

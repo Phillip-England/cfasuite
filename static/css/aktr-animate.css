@@ -1,0 +1,52 @@
+
+.aktr-fade-in {
+    animation: aktrFadeIn 100ms ease-in forwards;
+}
+  
+.aktr-fade-in-half {
+    animation: aktrFadeInHalf 200ms ease-in forwards;
+}
+  
+.aktr-fade-out {
+    animation: aktrFadeOut 100ms ease-out forwards;
+}
+
+.aktr-fade-out-half {
+    animation: aktrFadeOutHalf 100ms ease-out forwards;
+}
+  
+@keyframes aktrFadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes aktrFadeInHalf {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes aktrFadeOut {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes aktrFadeOutHalf {
+    0% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 0;
+    }
+}
