@@ -36,7 +36,7 @@ async fn main() {
 
 	// getting hostname
 	let host = "0.0.0.0";
-	let addr = format!("{}:{}", host, "8080");
+	let addr = format!("{}:{}", host, "8000");
 
     // setting up shared state
     let shared_state = Arc::new(new_app_state());

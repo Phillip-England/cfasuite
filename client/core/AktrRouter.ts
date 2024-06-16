@@ -1,5 +1,6 @@
 import type { AktrService } from "./AktrService";
 import type { AktrContext } from "./AktrContext";
+import type { AktrResult } from "./AktrResult";
 
 export type AktrRoute = { [key: string]: AktrService[] }
 
