@@ -1,7 +1,14 @@
 
 
-pub fn template_form(title: &str, action: &str, err: &str, content: &str) -> String {
-    let lower_title = title.to_lowercase();
+pub struct PropsTemplateForm<'a> {
+    pub title: &'a str,
+    pub action: &'a str,
+    pub err: &'a str,
+    pub content: &'a str,
+}
+
+pub fn template_form(props: PropsTemplateForm) -> String {
+    let lower_title = props.title.to_lowercase();
     return format!(/*html*/r#"
             <form id='{}-form' class='flex flex-col gap-12' action="{}" method="POST">
                 <h2 class='text-2xl font-semibold'>{}</h2>
@@ -9,11 +16,34 @@ pub fn template_form(title: &str, action: &str, err: &str, content: &str) -> Str
             </form>
         "#,
         lower_title,
-        action,
-        title,
-        form_err(err),
-        content,
+        props.action,
+        props.title,
+        form_err(props.err),
+        props.content,
     );
+}
+
+pub fn form_login(err: &str, email: &str) -> String {
+    return template_form(PropsTemplateForm {
+        title: "Login",
+        action: "/",
+        err: err,
+        content: &format!(r#"{}{}{}"#,
+            form_input(PropsFormInput {
+                input_type: "text",
+                label: "Email",
+                name: "email",
+                value: email,
+            }),
+            form_input(PropsFormInput {
+                input_type: "password",
+                label: "Password",
+                name: "password",
+                value: "",
+            }),
+            form_submit("Login"),
+        ),
+    });
 }
 
 pub fn form_err(err: &str) -> String {
@@ -27,26 +57,25 @@ pub fn form_err(err: &str) -> String {
     return err_html;
 }
 
-pub fn form_login(err: &str) -> String {
-    return template_form("Login", "/", err, &format!(/*html*/r#"{}{}{}"#,
-        form_input("text", "Email", "email"),
-        form_input("password", "Password", "password"),
-        form_submit("Login"),
-    ));
+pub struct PropsFormInput<'a> {
+    pub input_type: &'a str,
+    pub label: &'a str,
+    pub name: &'a str,
+    pub value: &'a str,
 }
 
-pub fn form_input(input_type: &str, label: &str, name: &str) -> String {
+pub fn form_input(props: PropsFormInput) -> String {
     return format!(/*html*/r#"
         <div class='flex flex-col gap-1'>
             <label class='text-sm' for="{}">{}</label>
-            <input type="{}" name="{}" autocomplete="current-{}" class='px-2 py-1 text-sm border border-gray-100 transition duration-200 focus:outline-none focus:border-gray-500 rounded'>
+            <input type="{}" name="{}" autocomplete="current-{}" value="{}" class='px-2 py-1 text-sm border border-gray-100 transition duration-200 focus:outline-none focus:border-gray-500 rounded'>
         </div>
-    "#, name, label, input_type, name, name);
+    "#, props.name, props.label, props.input_type, props.name, props.name, props.value);
 }
 
 pub fn form_submit(label: &str) -> String {
     return format!(/*html*/r#"
-        <button type="submit" class='p-2 border focus:outline-none bg-primary text-sm rounded text-white transition duration-200 focus:ring-2 focus:ring-primary focus:ring-opacity-50'>{}</button>
+        <button type="submit" class='p-2 focus:outline-none bg-primary text-sm rounded text-white transition duration-200 focus:ring-4 focus:ring-primary focus:ring-opacity-50'>{}</button>
     "#, label);
 }
 

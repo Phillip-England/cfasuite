@@ -1,6 +1,5 @@
 
 
-use crate::component::misc::overlay;
 
 pub fn template_nav(nav_items: &str) -> String {
     return format!(/*html*/r#"
@@ -10,8 +9,7 @@ pub fn template_nav(nav_items: &str) -> String {
             </div>
             <ul class='flex flex-col gap-1 p-1'>{}</ul>
         </nav>
-        {}
-    "#, nav_items, overlay("nav-overlay"));
+    "#, nav_items);
 }
 
 pub fn admin_nav_menu(path: &str) -> String {
@@ -32,10 +30,3 @@ pub fn nav_item(title: &str, href: &str, path: &str) -> String {
     "#, active_class, href, title);
 }
 
-pub fn nav_loader() -> String {
-    return format!(/*html*/r#"
-        <div id='nav-loader' class='fixed hidden opacity-0 top-0 left-0 w-full h-full z-30 flex justify-center'>
-            <div class='rounded-full border-8 border-t-8 border-t-primary relative top-[100px] animate-spin border-black h-32 w-32'></div>
-        </div>
-    "#);
-}

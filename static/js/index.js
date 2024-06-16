@@ -9,9 +9,17 @@ class AktrRouter {
   }
   hydrate(path) {
     if (this.routes[path]) {
-      let ctx = {};
-      this.routes[path].forEach((service) => {
-        service(ctx);
+      let ctx = {
+        data: {},
+        events: {}
+      };
+      this.routes[path].forEach(async (service) => {
+        try {
+          await service(ctx);
+        } catch (e) {
+          console.error(`error at AktrRouter.hydrate()`);
+          console.error(e);
+        }
       });
     } else {
       console.error(`route ${path} not found at AktrRouter.hydrate()`);
@@ -20,29 +28,29 @@ class AktrRouter {
 }
 
 // client/core/AktrElement.ts
-var qs = (selector, root = "document") => {
-  if (root === "document") {
+var qs = (selector, root = undefined) => {
+  if (!root) {
     let el2 = document.querySelector(selector);
     if (!el2) {
-      console.error(`AktrElement qs: element not found for selector ${selector}`);
+      throw new Error(`AktrElement qs: element not found for selector ${selector}`);
     }
     return new AktrElement(document.querySelector(selector));
   }
   let rootElement = root.me;
   let el = rootElement.querySelector(selector);
   if (!el) {
-    console.error(`AktrElement qs: element not found for selector ${selector}`);
+    throw new Error(`AktrElement qs: element not found for selector ${selector}`);
   }
   return new AktrElement(el);
 };
-var qsa = (selector, root = "document") => {
-  if (root === "document") {
+var qsa = (selector, root = undefined) => {
+  if (!root) {
     return Array.from(document.querySelectorAll(selector)).map((e) => new AktrElement(e));
   }
   let rootElement = root.me;
   let els = rootElement.querySelectorAll(selector);
   if (!els) {
-    console.error(`AktrElement qsa: elements not found for selector ${selector}`);
+    throw new Error(`AktrElement qsa: elements not found for selector ${selector}`);
   }
   return Array.from(document.querySelectorAll(selector)).map((e) => new AktrElement(e));
 };
@@ -107,18 +115,46 @@ class AktrElement {
   }
 }
 
+// client/core/AktrContext.ts
+class AktrContextWorker {
+  static async storeEvent(ctx, key, event) {
+    ctx.events[key] = event;
+  }
+  static async getEvent(ctx, key) {
+    let events = ctx.events;
+    if (!events) {
+      throw new Error(`event with key ${key} not found in AktrContext`);
+    }
+    return events[key];
+  }
+  static async executeEvent(ctx, key) {
+    let event = await AktrContextWorker.getEvent(ctx, key);
+    await event();
+  }
+  static async storeData(ctx, key, data) {
+    ctx.data[key] = data;
+  }
+  static async getData(ctx, key) {
+    if (!ctx.data[key]) {
+      throw new Error(`data with key ${key} not found in AktrContext`);
+    }
+    return ctx.data[key];
+  }
+}
+
 // client/service/ServiceNav.ts
 class ServiceNav {
   static builder = (args) => {
-    return (ctx) => {
+    return async (ctx) => {
       let bars = qs(args.bars);
       let nav = qs(args.nav);
       let overlay = qs(args.overlay);
       let loader = qs(args.loader);
       let navItems = qsa(".nav-item", nav);
-      bars.on("click", (e) => {
-        AktrElement.removeFromAll("hidden", nav, overlay);
+      bars.on("click", async (e) => {
+        AktrElement.removeFromAll("hidden", nav);
         AktrElement.addToAll("aktr-fade-in", nav);
+        await AktrContextWorker.executeEvent(ctx, "overlay-fade-in");
         overlay.add("aktr-fade-in-half");
       });
       overlay.on("click", (e) => {
@@ -146,15 +182,15 @@ class ServiceNav {
   static admin = ServiceNav.builder({
     bars: "#header-bars",
     nav: "#nav",
-    overlay: "#nav-overlay",
-    loader: "#nav-loader"
+    overlay: "#overlay",
+    loader: "#main-loader"
   });
 }
 
 // client/service/ServiceForm.ts
 class ServiceForm {
   static builder = (args) => {
-    return (ctx) => {
+    return async (ctx) => {
       let form = qs(args.form);
       let inputs = qsa("input", form);
       let err = qs(".form-err", form);
@@ -184,7 +220,28 @@ class ServiceForm {
   });
 }
 
+// client/service/ServiceOverlay.ts
+class ServiceOverlay {
+  static builder = (args) => {
+    return async (ctx) => {
+      let overlay = qs(args.overlay);
+      AktrContextWorker.storeEvent(ctx, "overlay-fade-in", async () => {
+        overlay.remove("hidden").add("aktr-fade-in");
+      });
+      AktrContextWorker.storeEvent(ctx, "overlay-fade-out", async () => {
+        overlay.add("aktr-fade-out");
+        setTimeout(() => {
+          overlay.add("hidden").remove("aktr-fade-out");
+        }, 200);
+      });
+    };
+  };
+  static overlay = ServiceOverlay.builder({
+    overlay: "#overlay"
+  });
+}
+
 // client/index.ts
 var aktrRouter = new AktrRouter;
-aktrRouter.add("/", ServiceForm.login);
-aktrRouter.add("/admin", ServiceNav.admin);
+aktrRouter.add("/", ServiceOverlay.overlay, ServiceForm.login);
+aktrRouter.add("/admin", ServiceOverlay.overlay, ServiceNav.admin);

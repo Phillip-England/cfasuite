@@ -2,9 +2,20 @@
 use crate::component::header::header;
 use crate::component::header::admin_header;
 use crate::component::nav::admin_nav_menu;
-use crate::component::nav::nav_loader;
+use crate::component::misc::main_loader;
 
-pub fn layout_base(title: &str, header: &str, nav_menu: &str, content: &str) -> String {
+use super::misc::overlay;
+
+pub struct PropsLayoutBase<'a> {
+    pub title: &'a str,
+    pub header: &'a str,
+    pub nav_menu: &'a str,
+    pub overlay: &'a str,
+    pub loader: &'a str,
+    pub content: &'a str,
+}
+
+pub fn layout_base(props: PropsLayoutBase) -> String {
     return format!(/*html*/r#"
         <!DOCTYPE html>
         <html lang="en">
@@ -18,18 +29,32 @@ pub fn layout_base(title: &str, header: &str, nav_menu: &str, content: &str) -> 
             <title>{} - CFA Suite</title>
         </head>
         <body hx-boost='true'>
-            {}{}{}
+            {}{}{}{}
             <main class='p-6'>{}</main>
             <script>aktrRouter.hydrate(window.location.pathname)</script>
         </body>
         </html>
-    "#, title, header, nav_menu, nav_loader(), content);
+    "#, props.title, props.header, props.nav_menu, props.loader, props.overlay, props.content);
 }
 
 pub fn layout_guest(title: &str, _path: &str, content: &str) -> String {
-    return layout_base(title, &header(""), "", content);
+    return layout_base(PropsLayoutBase {
+        title: title,
+        header: &header(""),
+        nav_menu: "",
+        overlay: &overlay("overlay"),
+        loader: &main_loader("main-loader"),
+        content: content,
+    });
 }
 
 pub fn layout_admin(title: &str, path: &str, content: &str) -> String {
-    return layout_base(title, &admin_header(), &admin_nav_menu(path), content);
+    return layout_base(PropsLayoutBase {
+        title: title,
+        header: &admin_header(),
+        nav_menu: &admin_nav_menu(path),
+        overlay: &overlay("overlay"),
+        loader: &main_loader("main-loader"),
+        content: content,
+    });
 }

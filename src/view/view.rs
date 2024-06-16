@@ -20,8 +20,12 @@ pub async fn home(
     if let Some(value) = params.get("login_err") {
         login_err = value;
     }
+    let mut email = "";
+    if let Some(value) = params.get("email") {
+        email = value;
+    }
     Html(layout_guest("Home", uri.path(),  &format!("{}",
-        form_login(login_err),
+        form_login(login_err, email),
     )))
 }
 

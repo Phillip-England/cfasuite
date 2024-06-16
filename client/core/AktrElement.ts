@@ -1,29 +1,29 @@
 
 
-export const qs = (selector: string, root: string | AktrElement = 'document'): AktrElement => {
-    if (root === 'document') {
+export const qs = (selector: string, root: AktrElement | undefined = undefined): AktrElement => {
+    if (!root) {
         let el = document.querySelector(selector) as HTMLElement;
         if (!el) {
-            console.error(`AktrElement qs: element not found for selector ${selector}`);
+            throw new Error(`AktrElement qs: element not found for selector ${selector}`);
         }
         return new AktrElement(document.querySelector(selector) as HTMLElement);
     }
     let rootElement = (root as AktrElement).me;
     let el = rootElement.querySelector(selector) as HTMLElement;
     if (!el) {
-        console.error(`AktrElement qs: element not found for selector ${selector}`);
+        throw new Error(`AktrElement qs: element not found for selector ${selector}`);
     }
     return new AktrElement(el);
 }
 
-export const qsa = (selector: string, root: string | AktrElement = "document"): AktrElement[] => {
-    if (root === 'document') {
+export const qsa = (selector: string, root: AktrElement | undefined = undefined): AktrElement[] => {
+    if (!root) {
         return Array.from(document.querySelectorAll(selector)).map(e => new AktrElement(e as HTMLElement));
     }
     let rootElement = (root as AktrElement).me;
     let els = rootElement.querySelectorAll(selector);
     if (!els) {
-        console.error(`AktrElement qsa: elements not found for selector ${selector}`);
+        throw new Error(`AktrElement qsa: elements not found for selector ${selector}`);
     }
     return Array.from(document.querySelectorAll(selector)).map(e => new AktrElement(e as HTMLElement));
 }

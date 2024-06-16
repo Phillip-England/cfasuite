@@ -1,12 +1,12 @@
 import type { AktrService, AktrServiceBuilder, AktrServiceArgs } from "../core/AktrService"
 import { AktrElement, qs, qsa } from "../core/AktrElement"
-import type { AktrContext } from "../core/AktrContext";
+import { AktrContextWorker, type AktrContext } from "../core/AktrContext";
 
 
 export class ServiceNav {
 
-    static builder: AktrServiceBuilder = (args: AktrServiceArgs) => {
-        return (ctx: AktrContext) => {
+    static builder: AktrServiceBuilder = (args: AktrServiceArgs): AktrService => {
+        return async (ctx: AktrContext) => {
 
             let bars = qs(args.bars);
             let nav = qs(args.nav);
@@ -14,9 +14,10 @@ export class ServiceNav {
             let loader = qs(args.loader);
             let navItems = qsa('.nav-item', nav);
 
-            bars.on('click', (e) => {
-                AktrElement.removeFromAll('hidden', nav, overlay)
+            bars.on('click', async (e) => {
+                AktrElement.removeFromAll('hidden', nav)
                 AktrElement.addToAll('aktr-fade-in', nav)
+                await AktrContextWorker.executeEvent(ctx, 'overlay-fade-in')
                 overlay.add('aktr-fade-in-half')
             });
 
@@ -48,8 +49,8 @@ export class ServiceNav {
     static admin: AktrService = ServiceNav.builder({
         bars: '#header-bars',
         nav: '#nav',
-        overlay: '#nav-overlay',
-        loader: '#nav-loader'
+        overlay: '#overlay',
+        loader: '#main-loader'
     })
 
 
