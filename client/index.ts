@@ -1,6 +1,6 @@
 import { AktrRouter } from './core/AktrRouter';
-import { ServiceNav } from './src/service/ServiceNav';
-import { ServiceForm } from './src/service/ServiceForm';
+import { ServiceNav } from './service/ServiceNav';
+import { ServiceForm } from './service/ServiceForm';
 
 const aktrRouter = new AktrRouter();
 

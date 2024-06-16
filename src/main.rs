@@ -3,6 +3,7 @@ mod view;
 mod middleware;
 mod state;
 mod component;
+mod security;
 
 use crate::view::view::{
     home,
@@ -10,8 +11,8 @@ use crate::view::view::{
     admin_panel,
 	logout,
 };
-use crate::view::form::login;
-use crate::middleware::middleware::TimingMiddleware;
+use crate::view::form_action::login;
+use crate::middleware::log::LoggerMiddleware;
 use crate::state::state::new_app_state;
 
 use std::sync::Arc;
@@ -21,6 +22,7 @@ use axum::{
     routing::post,
 	Router,
 };
+use middleware::auth::AuthMiddleware;
 use tower_http::services::ServeDir;
 
 #[macro_use]
@@ -40,14 +42,15 @@ async fn main() {
 
 	// building router
 	let app = Router::new()
-		.route("/", get(home))
+        .route("/admin", get(admin_panel))
+        .layer(AuthMiddleware)
+        .route("/", get(home))
         .route("/", post(login))
 		.route("/logout", get(logout))
-        .route("/admin", get(admin_panel))
         .nest_service("/static", ServeDir::new("static"))
-        .layer(TimingMiddleware)
-        .layer(Extension(shared_state))
-        .fallback(get(not_found));
+        .fallback(get(not_found))
+        .layer(LoggerMiddleware)
+        .layer(Extension(shared_state));
 
 	// binding and serving
 	println!("development server running on {}", addr);

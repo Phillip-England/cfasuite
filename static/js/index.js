@@ -1,70 +1,4 @@
-<<<<<<< HEAD
-
-
-function qs(id) {
-    return document.querySelector(id);
-}
-
-function qsa(id) {
-    return document.querySelectorAll(id);
-}
-
-class Dom {
-
-    static climbUntil(element, callback) {
-        if (!element) {
-            return qs('html')
-        }
-        if (callback(element) == true) {
-            return element
-        }
-        return Dom.climbUntil(element.parentElement, callback)
-    }
-
-    static parseForm(form) {
-        const formData = new FormData(form);
-        const formObject = {};
-        formData.forEach((value, key) => {
-            formObject[key] = value;
-        });
-        let potentialErrElement = form.querySelector('.form-err');
-        if (potentialErrElement) {
-            formObject['err'] = potentialErrElement;
-        }
-        return formObject;
-    }
-
-}
-
-class FuncRunner {
-
-    constructor() {
-        this.funcs = [];
-    }
-
-    add(func) {
-        this.funcs.push(func);
-    }
-
-    run() {
-        console.log(this.funcs)
-        this.funcs.forEach(func => {
-            func();
-        });
-    }
-
-}
-
-let funcRunner = new FuncRunner();
-
-funcRunner.add(() => {
-    window.addEventListener('DOMContentLoaded', () => {
-
-    })
-})
-
-=======
-// client/src/core/AktrRouter.ts
+// client/core/AktrRouter.ts
 class AktrRouter {
   routes;
   constructor() {
@@ -85,7 +19,7 @@ class AktrRouter {
   }
 }
 
-// client/src/core/AktrElement.ts
+// client/core/AktrElement.ts
 var qs = (selector, root = "document") => {
   if (root === "document") {
     let el2 = document.querySelector(selector);
@@ -163,7 +97,7 @@ class AktrElement {
   }
 }
 
-// client/src/service/ServiceNav.ts
+// client/service/ServiceNav.ts
 class ServiceNav {
   static builder = (args) => {
     return (ctx) => {
@@ -193,7 +127,7 @@ class ServiceNav {
   });
 }
 
-// client/src/service/ServiceForm.ts
+// client/service/ServiceForm.ts
 class ServiceForm {
   static builder = (args) => {
     return (ctx) => {
@@ -230,4 +164,3 @@ class ServiceForm {
 var aktrRouter = new AktrRouter;
 aktrRouter.add("/", ServiceForm.login);
 aktrRouter.add("/admin", ServiceNav.admin);
->>>>>>> fb8acef (init)

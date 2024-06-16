@@ -8,24 +8,24 @@ use axum::http::{Request, Response, StatusCode};
 
 // Middleware layer
 #[derive(Clone)]
-pub struct TimingMiddleware;
+pub struct LoggerMiddleware;
 
-impl<S> Layer<S> for TimingMiddleware {
-    type Service = TimingService<S>;
+impl<S> Layer<S> for LoggerMiddleware {
+    type Service = LoggerService<S>;
 
     fn layer(&self, service: S) -> Self::Service {
-        TimingService { service }
+        LoggerService { service }
     }
 }
 
 // Define the middleware service
 #[derive(Clone)]
-pub struct TimingService<S> {
+pub struct LoggerService<S> {
     service: S,
 }
 
 // Implement the Service trait for the middleware
-impl<S, B> Service<Request<B>> for TimingService<S>
+impl<S, B> Service<Request<B>> for LoggerService<S>
 where
     S: Service<Request<B>, Response = Response<B>, Error = Infallible> + Clone + Send + 'static,
     S::Future: Send + 'static,

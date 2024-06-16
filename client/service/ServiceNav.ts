@@ -1,6 +1,6 @@
-import type { AktrService, AktrServiceBuilder, AktrServiceArgs } from "../../core/AktrService"
-import { qs } from "../../core/AktrElement"
-import type { AktrContext } from "../../core/AktrContext";
+import type { AktrService, AktrServiceBuilder, AktrServiceArgs } from "../core/AktrService"
+import { qs } from "../core/AktrElement"
+import type { AktrContext } from "../core/AktrContext";
 
 
 export class ServiceNav {
