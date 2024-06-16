@@ -2,6 +2,7 @@
 use crate::component::header::header;
 use crate::component::header::admin_header;
 use crate::component::nav::admin_nav_menu;
+use crate::component::nav::nav_loader;
 
 pub fn layout_base(title: &str, header: &str, nav_menu: &str, content: &str) -> String {
     return format!(/*html*/r#"
@@ -17,12 +18,12 @@ pub fn layout_base(title: &str, header: &str, nav_menu: &str, content: &str) -> 
             <title>{} - CFA Suite</title>
         </head>
         <body hx-boost='true'>
-            {}{}
+            {}{}{}
             <main class='p-6'>{}</main>
             <script>aktrRouter.hydrate(window.location.pathname)</script>
         </body>
         </html>
-    "#, title, header, nav_menu, content);
+    "#, title, header, nav_menu, nav_loader(), content);
 }
 
 pub fn layout_guest(title: &str, _path: &str, content: &str) -> String {

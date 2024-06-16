@@ -22,7 +22,8 @@ use axum::{
     routing::post,
 	Router,
 };
-use middleware::auth::AuthMiddleware;
+use middleware::auth::AdminAuthMiddleware;
+use middleware::auth::GuestAuthMiddleware;
 use tower_http::services::ServeDir;
 
 #[macro_use]
@@ -40,13 +41,22 @@ async fn main() {
     // setting up shared state
     let shared_state = Arc::new(new_app_state());
 
-	// building router
-	let app = Router::new()
-        .route("/admin", get(admin_panel))
-        .layer(AuthMiddleware)
+    // building admin router
+    let admin_routes = Router::new()
+        .route("/", get(admin_panel))
+        .layer(AdminAuthMiddleware);
+
+    // building guest router
+    let guest_routes = Router::new()
         .route("/", get(home))
         .route("/", post(login))
-		.route("/logout", get(logout))
+        .layer(GuestAuthMiddleware);
+
+    // building main router
+    let app = Router::new()
+        .nest("/admin", admin_routes)
+        .merge(guest_routes)
+        .route("/logout", get(logout))
         .nest_service("/static", ServeDir::new("static"))
         .fallback(get(not_found))
         .layer(LoggerMiddleware)

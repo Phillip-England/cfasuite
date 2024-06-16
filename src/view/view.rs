@@ -2,10 +2,9 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use time::Duration;
 
-use axum::extract::Query;
+use axum::extract::{Extension, OriginalUri, Query};
 use axum::http::{Uri, header::{HeaderMap, SET_COOKIE}};
 use axum::response::{Html, IntoResponse, Redirect};
-use axum::Extension;
 use cookie::Cookie;
 
 use crate::component::form::form_login;
@@ -28,11 +27,13 @@ pub async fn home(
 
 pub async fn admin_panel(
     Extension(_shared_state): Extension<Arc<AppState>>,
-    uri: Uri,
+    OriginalUri(original_uri): OriginalUri,
 ) -> impl IntoResponse {
-    Html(layout_admin("Admin", uri.path(), &format!("",
-
-    )))
+    let path = original_uri.path().to_string();
+    
+    Html(layout_admin("Admin", &path, &format!(r#"
+    
+    "#)))
 }
 
 pub async fn logout(

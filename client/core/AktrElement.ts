@@ -36,6 +36,18 @@ export class AktrElement {
         this.me.setAttribute('aktr', '');
     }
 
+    static addToAll(className: string, ...elements: AktrElement[]) {
+        elements.forEach(e => {
+            e.add(className);
+        });
+    }
+
+    static removeFromAll(className: string, ...elements: AktrElement[]) {
+        elements.forEach(e => {
+            e.remove(className);
+        });
+    }
+
     on(event: string, handler: (e: Event) => void): AktrElement {
         this.me.addEventListener(event, handler);
         return this;
