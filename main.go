@@ -50,13 +50,17 @@ func main() {
 		templates, _ := vbf.GetContext(KeyTemplates, r).(*template.Template)
 		if r.URL.Path == "/" {
 			portalPage := page.NewPortal(r)
-			cookie, _ := r.Cookie(os.Getenv("SESSION_TOKEN_NAME"))
+			loginPage := page.NewLogin(r)
+			cookie, err := r.Cookie(os.Getenv("SESSION_TOKEN_NAME"))
+			if err != nil {
+				vbf.ExecuteTemplate(w, templates, loginPage.TemplateName, loginPage)
+				return
+			}
 			if cookie.Value == os.Getenv("SESSION_TOKEN_VALUE") {
 				http.Redirect(w, r, portalPage.RedirectPath, 302)
 				return
 			}
-			loginPage := page.NewLogin(r)
-			vbf.ExecuteTemplate(w, templates, "login.html", loginPage)
+			vbf.ExecuteTemplate(w, templates, loginPage.TemplateName, loginPage)
 		} else {
 			vbf.WriteString(w, "404 not found")
 		}
@@ -64,8 +68,24 @@ func main() {
 
 	vbf.AddRoute("GET /portal", mux, gCtx, func(w http.ResponseWriter, r *http.Request) {
 		templates, _ := vbf.GetContext(KeyTemplates, r).(*template.Template)
-		vbf.ExecuteTemplate(w, templates, "portal.html", nil)
+		portalPage := page.NewPortal(r)
+		vbf.ExecuteTemplate(w, templates, portalPage.TemplateName, nil)
 	}, vbf.MwLogger, mw.UserAuth)
+
+	vbf.AddRoute("GET /logout", mux, gCtx, func(w http.ResponseWriter, r *http.Request) {
+		loginPage := page.NewLogin(r)
+		http.SetCookie(w, &http.Cookie{
+			Name:     os.Getenv("SESSION_TOKEN_NAME"),
+			Value:    "",
+			Path:     "/",
+			Expires:  time.Unix(0, 0),
+			MaxAge:   -1,
+			HttpOnly: true,
+			Secure:   true,
+			SameSite: http.SameSiteStrictMode,
+		})
+		http.Redirect(w, r, loginPage.RedirectPath, 302)
+	}, vbf.MwLogger)
 
 	//=======================
 	// FORMS
@@ -96,7 +116,8 @@ func main() {
 			Secure:   true,
 			SameSite: http.SameSiteStrictMode,
 		})
-		http.Redirect(w, r, "/portal", 302)
+		portalPage := page.NewPortal(r)
+		http.Redirect(w, r, portalPage.RedirectPath, 302)
 	}, vbf.MwLogger)
 
 	err = vbf.Serve(mux, "8080")
