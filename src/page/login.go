@@ -3,14 +3,14 @@ package page
 import "net/http"
 
 type Login struct {
-	LoginErr    string
-	HasLoginErr bool
-	Path        string
+	LoginErr     string
+	HasLoginErr  bool
+	RedirectPath string
 }
 
 func NewLogin(r *http.Request) *Login {
 	page := &Login{
-		Path: "/",
+		RedirectPath: "/",
 	}
 	loginErr := r.URL.Query().Get("loginErr")
 	if loginErr != "" {
@@ -22,5 +22,5 @@ func NewLogin(r *http.Request) *Login {
 func (p *Login) SetLoginErr(err string) {
 	p.HasLoginErr = true
 	p.LoginErr = err
-	p.Path = "/?loginErr=" + p.LoginErr
+	p.RedirectPath = "/?loginErr=" + p.LoginErr
 }
