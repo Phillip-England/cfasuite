@@ -19,8 +19,8 @@
         </div>
     </header>
 
-    <nav class="fixed top-[85px] w-full flex flex-col hidden h-full bg-white">
-        <ul class="flex flex-col p-4 gap-4">
+    <nav class="fixed top-[85px] w-full flex-col hidden h-full bg-white md:left-0 md:flex md:w-[350px] md:border-r border-gray-200">
+        <ul class="flex flex-col p-4 gap-4 text-sm">
             <li class="flex">
                 <a href='/portal' class="p-4 border rounded w-full border-gray-200">Home</a>
             </li>
@@ -29,6 +29,28 @@
             </li>
         </ul>
     </nav>
+
+    <div class="h-[85px]"></div>
+
+    <main class="flex flex-col md:ml-[350px] md:p-4 md:flex-wrap md:flex-row md:gap-4">
+
+        <div class="border-b border-gray-200 p-4 flex flex-col gap-4 md:w-fit md:border md:rounded">
+            <div class="flex flex-col gap-1">
+                <h2 class="font-bold text-3xl">Scorecard</h2>
+                <p class="text-sm">See our business results!</p>
+            </div>
+            <img class="rounded" src="/static/img/scorecard-lg.webp" width="200px" />
+        </div>
+
+        <div class="border-b border-gray-200 p-4 flex flex-col gap-4 md:w-fit md:border md:rounded">
+            <div class="flex flex-col gap-1">
+                <h2 class="font-bold text-3xl">Scorecard</h2>
+                <p class="text-sm">See our business results!</p>
+            </div>
+            <img class="rounded" src="/static/img/scorecard-lg.webp" width="200px" />
+        </div>
+
+    </main>
 
     <script>
 
@@ -52,6 +74,7 @@
         // nav toggling
         bars.addEventListener('click', () => {
             nav.classList.toggle('hidden')
+            nav.classList.toggle('flex')
         })
 
 
