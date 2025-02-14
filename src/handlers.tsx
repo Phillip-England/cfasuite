@@ -1,11 +1,11 @@
 import { BodyType, Context, Handler, logger } from "xerus/primitives";
 import { renderToString } from "react-dom/server";
 import { PageLogin, PageScorecard } from "./pages";
-import { adminAuth, loggedInRedirect } from "./middleware";
+import { mwAdminAuth, mwAdminRedirect } from "./middleware";
 
 export const handleHome = new Handler(async (c: Context): Promise<Response> => {
   return c.html(renderToString(<PageLogin loginErr={c.query('loginErr')} />));
-}, logger, loggedInRedirect);
+}, logger, mwAdminRedirect);
 
 export const handleStatic = new Handler(
   async (c: Context): Promise<Response> => {
@@ -36,7 +36,7 @@ export const handleLogin = new Handler(
 
 export const handleScorecard = new Handler(async (c: Context): Promise<Response> => {
   return c.html(renderToString(<PageScorecard/>));
-}, logger, adminAuth);
+}, logger, mwAdminAuth);
 
 export const handleLogout = new Handler(async (c: Context): Promise<Response> => {
 	c.clearCookie(process.env.ADMIN_COOKIE as string)
