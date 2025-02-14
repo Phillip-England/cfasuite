@@ -1,10 +1,11 @@
 import { BodyType, Context, Handler, logger } from "xerus/primitives";
 import { renderToString } from "react-dom/server";
-import { PageLogin } from "./pages";
+import { PageLogin, PageScorecard } from "./pages";
+import { adminAuth, loggedInRedirect } from "./middleware";
 
 export const handleHome = new Handler(async (c: Context): Promise<Response> => {
-  return c.html(renderToString(<PageLogin loginErr=""/>));
-}, logger);
+  return c.html(renderToString(<PageLogin loginErr={c.query('loginErr')} />));
+}, logger, loggedInRedirect);
 
 export const handleStatic = new Handler(
   async (c: Context): Promise<Response> => {
@@ -18,13 +19,27 @@ export const handleStatic = new Handler(
 
 export const handleLogin = new Handler(
   async (c: Context): Promise<Response> => {
-    let { data, err } = await c.parseBody(BodyType.FORM)
-    if (err) {
-      return c.status(400).send('invalid parsing at /form/login')
+    let data = await c.parseBody(BodyType.FORM);
+    if (
+      data.username == process.env.ADMIN_USERNAME &&
+      data.password == process.env.ADMIN_PASSWORD
+    ) {
+			c.setCookie(process.env.ADMIN_COOKIE as string, process.env.ADMIN_TOKEN as string, {
+				httpOnly: true,
+				path: "/",
+				secure: true,
+			})
+      return c.redirect("/app/scorecard");
     }
-    if (data.username == process.env.ADMIN_USERNAME && data.password == process.env.ADMIN_PASSWORD) {
-      return c.redirect('/')
-    }
-    return c.redirect('/')
-  },
-);
+    return c.redirect("/?loginErr=invalid credentials");
+  }, logger);
+
+export const handleScorecard = new Handler(async (c: Context): Promise<Response> => {
+  return c.html(renderToString(<PageScorecard/>));
+}, logger, adminAuth);
+
+export const handleLogout = new Handler(async (c: Context): Promise<Response> => {
+	c.clearCookie(process.env.ADMIN_COOKIE as string)
+	console.log('hit')
+	return c.redirect("/")
+}, logger);

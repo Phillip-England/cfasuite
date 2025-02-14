@@ -19,18 +19,25 @@ export function Root({ children }: RootProps) {
   );
 }
 
-export function FormLogin() {
+export function FormLogin(props: { loginErr: string }) {
   return (
-    <form method="POST" action='/form/login'>
+    <form method="POST" action="/form/login">
+      <h1>Login</h1>
+      {props.loginErr && <p>{props.loginErr}</p>}
       <div>
-        <label>username</label>
-        <input type='text' name='username' defaultValue='admin' />
+        <label>Username</label>
+        <input type="text" name="username" defaultValue="admin" />
       </div>
       <div>
-        <label>password</label>
-        <input type='password' name='password' defaultValue='thepasswordthatbeatsit' />
+        <label>Password</label>
+        <input
+          type="password"
+          name="password"
+          defaultValue="thepasswordthatbeatsit"
+        />
       </div>
-      <input type='submit' />
+      <input type="submit" />
     </form>
-  )
+  );
 }
+

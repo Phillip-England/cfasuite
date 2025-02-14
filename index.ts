@@ -1,12 +1,14 @@
 import { Context, Handler, logger, Router } from "xerus/primitives";
-import { handleHome, handleLogin, handleStatic } from "./src/handlers";
+import { handleHome, handleLogin, handleLogout, handleScorecard, handleStatic } from "./src/handlers";
 
 const r = new Router();
 
 r
   .get("/static/*", handleStatic)
   .get("/", handleHome)
-  .post('/form/login', handleLogin)
+  .post("/form/login", handleLogin)
+	.get('/app/scorecard', handleScorecard)
+	.get('/app/logout', handleLogout)
 
 const server = Bun.serve({
   port: 8080,
@@ -14,12 +16,15 @@ const server = Bun.serve({
     try {
       const { handler, c } = r.find(req);
       if (handler) {
-        return handler.execute(c);
+        return await handler.execute(c);
       }
-      return c.status(404).send("404 Not Found");
+      return new Response("404 Not Found", { status: 404 });
     } catch (e: any) {
       console.error(e);
-      return new Response("internal server error", { status: 500 });
+      return new Response("internal server error", {
+        status: 500,
+        headers: { "Content-Type": "text/plain" }, // Ensure text response
+      });
     }
   },
 });
