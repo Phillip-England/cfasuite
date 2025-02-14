@@ -1,0 +1,17 @@
+{
+  "name": "cfasuite",
+  "module": "index.ts",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/react": "^19.0.8"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "type": "module",
+  "dependencies": {
+    "@types/react-dom": "^19.0.3",
+    "react-dom": "^19.0.0",
+    "xerus": "github:phillip-england/xerus"
+  }
+}

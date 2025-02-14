@@ -14,7 +14,7 @@ kill:
 	sudo lsof -t -i:8080 | xargs kill -9
 
 run:
-	air
+	bun run --hot index.ts
 
-install:
-	flint spark; mv out ..; cd ..; mv out www.philthy.blog; cd www.philthy.blog; rm -r index.html; rm -r post; rm -r posts.html; rm -r screenplay.html; rm -r favicon.ico; rm -r static; cd out; mv * ..; cd ..; rm -r out;
+combine:
+	cat ./*.ts > combined.ts

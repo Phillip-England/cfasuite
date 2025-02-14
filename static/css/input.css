@@ -2,15 +2,15 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-    --color-dracula-background: #282a36;
-    --color-dracula-current: #44475a;
-    --color-dracula-foreground: #f8f8f2;
-    --color-dracula-comment: #6272a4;
-    --color-dracula-cyan: #8be9fd;
-    --color-dracula-green: #50fa7b;
-    --color-dracula-orange: #ffb86c;
-    --color-dracula-pink: #ff79c6;
-    --color-dracula-purple: #bd93f9;
-    --color-dracula-red: #ff5555;
-    --color-dracula-yellow: #f1fa8c;
+  --color-dracula-background: #282a36;
+  --color-dracula-current: #44475a;
+  --color-dracula-foreground: #f8f8f2;
+  --color-dracula-comment: #6272a4;
+  --color-dracula-cyan: #8be9fd;
+  --color-dracula-green: #50fa7b;
+  --color-dracula-orange: #ffb86c;
+  --color-dracula-pink: #ff79c6;
+  --color-dracula-purple: #bd93f9;
+  --color-dracula-red: #ff5555;
+  --color-dracula-yellow: #f1fa8c;
 }
