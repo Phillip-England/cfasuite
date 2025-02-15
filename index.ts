@@ -1,31 +1,43 @@
-import { Context, Handler, logger, Router } from "xerus/primitives";
-import { handleHome, handleLogin, handleLogout, handleScorecard, handleStatic } from "./src/handlers";
+import { logger, Xerus } from "xerus/xerus";
+import {
+  handleHome,
+  handleLogin,
+  handleLogout,
+  handleScorecard,
+  handleStatic,
+} from "./src/handlers";
+import {
+  mwAdminAuth,
+  mwAdminRedirect,
+  mwStoreSelection,
+} from "./src/middleware";
 
-const r = new Router();
+const app = new Xerus();
 
-r
+app.DEBUG_MODE = true;
+
+app.use(logger);
+
+app.group("/app/scorecard", mwAdminAuth, mwStoreSelection)
+  .get("/leadership", handleScorecard)
+  .get("/talent", handleScorecard)
+  .get("/cem", handleScorecard)
+  .get("/sales", handleScorecard)
+  .get("/finance", handleScorecard)
+  .get("/logout", handleLogout);
+
+app.group("/app", mwAdminAuth)
+  .get("/logout", handleLogout);
+
+app
   .get("/static/*", handleStatic)
-  .get("/", handleHome)
-  .post("/form/login", handleLogin)
-	.get('/app/scorecard', handleScorecard)
-	.get('/app/logout', handleLogout)
+  .get("/", handleHome, mwAdminRedirect)
+  .post("/form/login", handleLogin);
 
 const server = Bun.serve({
   port: 8080,
   fetch: async (req: Request) => {
-    try {
-      const { handler, c } = r.find(req);
-      if (handler) {
-        return await handler.execute(c);
-      }
-      return new Response("404 Not Found", { status: 404 });
-    } catch (e: any) {
-      console.error(e);
-      return new Response("internal server error", {
-        status: 500,
-        headers: { "Content-Type": "text/plain" }, // Ensure text response
-      });
-    }
+    return await app.run(req);
   },
 });
 

@@ -1,16 +1,8 @@
-# cfasuite
-
-To install dependencies:
-
+## Example .env
 ```bash
-bun install
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=thepasswordthatbeatsit
+ADMIN_COOKIE=auth
+ADMIN_TOKEN=asdasddqwqwdsasd
+STORE_COOKIE=selected_store
 ```
-
-To run:
-
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.2.2. [Bun](https://bun.sh)
-is a fast all-in-one JavaScript runtime.

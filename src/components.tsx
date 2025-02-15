@@ -41,3 +41,42 @@ export function FormLogin(props: { loginErr: string }) {
   );
 }
 
+export function StoreSelection(props: {
+  currentPath: string;
+}) {
+  return (
+    <ul>
+      <li>
+        <a href={props.currentPath + "?store=southroads"}>Southroads</a>
+      </li>
+      <li>
+        <a href={props.currentPath + "?store=utica"}>Utica</a>
+      </li>
+    </ul>
+  );
+}
+
+export function ScoreSelection() {
+  return (
+    <ul>
+      <li>
+        <a href="/app/scorecard/leadership">Leadership</a>
+      </li>
+      <li>
+        <a href="/app/scorecard/talent">Talent</a>
+      </li>
+      <li>
+        <a href="/app/scorecard/cem">Customer Experience</a>
+      </li>
+      <li>
+        <a href="/app/scorecard/sales">Sales & Brand Growth</a>
+      </li>
+      <li>
+        <a href="/app/scorecard/finance">Financial Stewardship</a>
+      </li>
+      <li>
+        <a href="/app/logout">Logout</a>
+      </li>
+    </ul>
+  );
+}

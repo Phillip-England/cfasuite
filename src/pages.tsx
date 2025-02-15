@@ -1,4 +1,4 @@
-import { FormLogin, Root } from "./components";
+import { FormLogin, Root, ScoreSelection, StoreSelection } from "./components";
 
 export function PageLogin(props: {
   loginErr: string;
@@ -10,10 +10,13 @@ export function PageLogin(props: {
   );
 }
 
-export function PageScorecard() {
+export function PageScorecard(props: {
+  currentPath: string;
+}) {
   return (
     <Root>
-      <a href='/app/logout'>Logout</a>
+      <StoreSelection currentPath={props.currentPath} />
+      <ScoreSelection />
     </Root>
   );
 }

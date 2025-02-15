@@ -1,45 +1,44 @@
-import { BodyType, Context, Handler, logger } from "xerus/primitives";
+import { BodyType, Context, Handler, logger } from "xerus/xerus";
 import { renderToString } from "react-dom/server";
 import { PageLogin, PageScorecard } from "./pages";
-import { mwAdminAuth, mwAdminRedirect } from "./middleware";
 
-export const handleHome = new Handler(async (c: Context): Promise<Response> => {
-  return c.html(renderToString(<PageLogin loginErr={c.query('loginErr')} />));
-}, logger, mwAdminRedirect);
+export const handleHome = async (c: Context): Promise<Response> => {
+  return c.html(renderToString(<PageLogin loginErr={c.query("loginErr")} />));
+};
 
-export const handleStatic = new Handler(
-  async (c: Context): Promise<Response> => {
-    let file = await c.file("." + c.path);
-    if (!file) {
-      return c.status(404).send("file not found");
-    }
-    return file;
-  },
-);
+export const handleStatic = async (c: Context): Promise<Response> => {
+  let file = Bun.file("." + c.path);
+  if (!file) {
+    return c.status(404).text("file not found");
+  }
+  return await c.file(file);
+};
 
-export const handleLogin = new Handler(
-  async (c: Context): Promise<Response> => {
-    let data = await c.parseBody(BodyType.FORM);
-    if (
-      data.username == process.env.ADMIN_USERNAME &&
-      data.password == process.env.ADMIN_PASSWORD
-    ) {
-			c.setCookie(process.env.ADMIN_COOKIE as string, process.env.ADMIN_TOKEN as string, {
-				httpOnly: true,
-				path: "/",
-				secure: true,
-			})
-      return c.redirect("/app/scorecard");
-    }
-    return c.redirect("/?loginErr=invalid credentials");
-  }, logger);
+export const handleLogin = async (c: Context): Promise<Response> => {
+  let data = await c.parseBody(BodyType.FORM);
+  if (
+    data.username == process.env.ADMIN_USERNAME &&
+    data.password == process.env.ADMIN_PASSWORD
+  ) {
+    c.setCookie(
+      process.env.ADMIN_COOKIE as string,
+      process.env.ADMIN_TOKEN as string,
+      {
+        httpOnly: true,
+        path: "/",
+        secure: true,
+      },
+    );
+    return c.redirect("/app/scorecard/leadership");
+  }
+  return c.redirect("/?loginErr=invalid credentials");
+};
 
-export const handleScorecard = new Handler(async (c: Context): Promise<Response> => {
-  return c.html(renderToString(<PageScorecard/>));
-}, logger, mwAdminAuth);
+export const handleScorecard = async (c: Context): Promise<Response> => {
+  return c.html(renderToString(<PageScorecard currentPath={c.path} />));
+};
 
-export const handleLogout = new Handler(async (c: Context): Promise<Response> => {
-	c.clearCookie(process.env.ADMIN_COOKIE as string)
-	console.log('hit')
-	return c.redirect("/")
-}, logger);
+export const handleLogout = async (c: Context): Promise<Response> => {
+  c.clearCookie(process.env.ADMIN_COOKIE as string);
+  return c.redirect("/");
+};
