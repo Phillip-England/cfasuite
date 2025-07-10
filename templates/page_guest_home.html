@@ -1,0 +1,23 @@
+{% extends "layout_guest.html" %}
+{% block title %}Guest Home{% endblock %}
+{% block content %}
+    <form action="/form/tp" method="POST" enctype="multipart/form-data">
+        <h1>Upload Time Punch</h1>
+        <input type="file" name="file"/>
+        <input type="submit"/>
+    </form>
+    <form action="/form/bio" method="POST" enctype="multipart/form-data">
+        <h1>Upload Employee Bio</h1>
+        <input type="file" name="file"/>
+        <input type="submit"/>
+    </form>
+    {% for emp in employees %}
+        <li>
+            <strong>ID:</strong> {{ emp.id }} <br>
+            <strong>TP Name:</strong> {{ emp.tp_name }} <br>
+            <strong>Full Name:</strong> {{ emp.full_name }} <br>
+            <strong>Department:</strong> {{ emp.dept.dept if emp.dept is not string else emp.dept }}
+        </li>
+        <hr>
+    {% endfor %}
+{% endblock %}
