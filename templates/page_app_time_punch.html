@@ -1,0 +1,10 @@
+{% extends "layout_app.html" %}
+{% block title %}Time Punch{% endblock %}
+{% block content %}
+    <h1>Time Punch - CFA Suite</h1>
+    <form action="/form/tp" method="POST" enctype="multipart/form-data">
+        <h1>Upload Time Punch</h1>
+        <input type="file" name="file"/>
+        <input type="submit"/>
+    </form>
+{% endblock %}

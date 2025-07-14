@@ -1,0 +1,15 @@
+{% extends "layout_app.html" %}
+{% block title %}Employees{% endblock %}
+{% block content %}
+    <h1>Employees - CFA Suite</h1>
+    <form action="/form/employees/create" method="POST" enctype="multipart/form-data">
+        <h1>Upload Employee Bio</h1>
+        <input type="file" name="file"/>
+        <input type="submit"/>
+    </form>
+    {% for emp in employees %}
+        <li>
+            <a href="/app/employee/{{ emp.id }}">{{ emp.tp_name }}</a>
+        </li>
+    {% endfor %}
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "layout_app.html" %}
+{% block title %}Locations{% endblock %}
+{% block content %}
+    <h1>Locations - CFA Suite</h1>
+    <form method="post" action="/form/cfa_location/create">
+        <h2>Create Locations</h2>
+        <div>
+            <label>name</label>
+            <input type="text" name="name" />
+        </div>
+        <div>
+            <label>number</label>
+            <input type="text" name="number" />
+        </div>
+        <input type="submit"/>
+    </form>
+
+    <ul>
+        {% for cfa_location in cfa_locations %}
+            <li>
+                <a href="/app/cfa_location/{{ cfa_location.id }}">{{ cfa_location.name }} - {{ cfa_location.number }}</a>
+            </li>
+                
+        {% endfor %}
+    </ul>
+
+
+
+{% endblock %}
