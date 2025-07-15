@@ -18,7 +18,7 @@ class CfaLocation:
 
         '''
 
-    def sql_insert(self):
+    def sql_insert_one(self):
         sql = '''INSERT INTO cfa_locations (name, number) VALUES (?, ?)'''
         params = (self.name, self.number,)
         return sql, params
@@ -30,9 +30,15 @@ class CfaLocation:
         return sql, params
     
     @staticmethod
-    def sql_select_one(id: int):
+    def sql_find_by_id(id: int):
         sql = f'''SELECT * FROM cfa_locations WHERE id = ?'''
         params = (id,)
+        return sql, params
+
+    @staticmethod
+    def sql_find_by_number(number: str):
+        sql = 'SELECT * FROM cfa_locations WHERE number = ?'
+        params = (number,)
         return sql, params
 
 

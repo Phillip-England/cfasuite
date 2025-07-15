@@ -20,9 +20,10 @@ class EmployeeDepartment:
         self.name = name
 
 class Employee:
-    def __init__(self, tp_name: str):
+    def __init__(self, tp_name: str, cfa_location_id: str):
         self.id = 0
         self.tp_name = tp_name
+        self.cfa_location_id = cfa_location_id
         name_parts = self.tp_name.split(',')
         self.full_name = f"{name_parts[1]} {name_parts[0]}"
         self.department = EmployeeDepartment("INIT")
@@ -39,29 +40,30 @@ DEPARTMENT: {self.department}\n
         employee.full_name = full_name
         employee.department = dept
     
-    def sql_insert(self):
-        sql = f'''INSERT INTO employees (tp_name, full_name, department) VALUES (?, ?, ?)'''
-        params = (self.tp_name, self.full_name, self.department.name,)
+    def sql_insert_one(self):
+        sql = f'''INSERT INTO employees (tp_name, full_name, department, cfa_location_id) VALUES (?, ?, ?, ?)'''
+        params = (self.tp_name, self.full_name, self.department.name, self.cfa_location_id,)
         return sql, params
     
-    def sql_find(self):
+    def sql_find_by_name(self):
         sql = f'''SELECT * FROM employees WHERE tp_name = ?'''
         params = (self.tp_name,)
         return sql, params
     
     @staticmethod
-    def sql_select_all():
-        sql = f'''SELECT * FROM employees'''  
-        params = ()
+    def sql_find_all_by_cfa_location_id(cfa_location_id: int):
+        sql = f'''SELECT * FROM employees WHERE cfa_location_id = ?'''  
+        params = (cfa_location_id,)
         return sql, params
 
     @staticmethod
     def many_from_db_rows(rows: list):
         employees = []
         for row in rows:
-            (id, tp_name, full_name, department) = row
+            (id, cfa_location_id, tp_name, full_name, department) = row
             employee = {
                 'id': id,
+                'cfa_location_id': cfa_location_id,
                 'tp_name': tp_name,
                 'full_name': full_name,
                 'department': department,
@@ -74,6 +76,7 @@ DEPARTMENT: {self.department}\n
         return '''
             CREATE TABLE IF NOT EXISTS employees (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                cfa_location_id INTEGER NOT NULL,
                 tp_name TEXT NOT NULL,
                 full_name TEXT NOT NULL,
                 department TEXT NOT NULL

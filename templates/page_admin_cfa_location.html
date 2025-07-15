@@ -12,4 +12,17 @@
         <input type="submit">
     </form>
 
+    <form action="/form/employees/create" method="POST" enctype="multipart/form-data">
+        <h2>Upload Employee Bio</h2>
+        <input type="file" name="file"/>
+        <input type="hidden" value="{{ cfa_location.id }}" name="cfa_location_id" />
+        <input type="submit"/>
+    </form>
+
+    {% for emp in employees %}
+        <li>
+            <a href="/app/employee/{{ emp.id }}">{{ emp.tp_name }}</a>
+        </li>
+    {% endfor %}
+
 {% endblock %}
