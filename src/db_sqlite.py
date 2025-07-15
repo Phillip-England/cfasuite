@@ -1,7 +1,7 @@
 from sqlite3 import Connection, connect
 
-from src.employee import Employee
-from src.cfa_location import CfaLocation
+from src.data_employee import Employee
+from src.data_cfa_location import CfaLocation
 
 def sqlite_connection(path: str):
     conn: Connection = connect(path)

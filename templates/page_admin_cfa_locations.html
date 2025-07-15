@@ -1,4 +1,4 @@
-{% extends "layout_app.html" %}
+{% extends "layout_admin.html" %}
 {% block title %}Locations{% endblock %}
 {% block content %}
     <h1>Locations - CFA Suite</h1>
@@ -18,7 +18,7 @@
     <ul>
         {% for cfa_location in cfa_locations %}
             <li>
-                <a href="/app/cfa_location/{{ cfa_location.id }}">{{ cfa_location.name }} - {{ cfa_location.number }}</a>
+                <a href="/admin/cfa_location/{{ cfa_location.id }}">{{ cfa_location.name }} - {{ cfa_location.number }}</a>
             </li>
                 
         {% endfor %}

@@ -1,0 +1,17 @@
+{% extends "layout_guest.html" %}
+{% block title %}Guest Home{% endblock %}
+{% block content %}
+    <h1>Guest Home - CFA Suite</h1>
+    <form method="post" action="/form/login">
+        <h2>Login</h2>
+        <div>
+            <label>username</label>
+            <input type="text" name="username" />
+        </div>
+        <div>
+            <label>password</label>
+            <input type="password" name="password" />
+        </div>
+        <input type="submit" />
+    </form>
+{% endblock %}

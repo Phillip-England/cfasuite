@@ -50,7 +50,7 @@ DEPARTMENT: {self.department}\n
         return sql, params
     
     @staticmethod
-    def sql_all():
+    def sql_select_all():
         sql = f'''SELECT * FROM employees'''  
         params = ()
         return sql, params

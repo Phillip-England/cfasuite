@@ -1,10 +1,12 @@
+import os
+
 import io
 from io import BytesIO
 
 from typing import Annotated
 
 from fastapi import FastAPI, Request, UploadFile, File, Form
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -12,8 +14,12 @@ from pdfminer.high_level import extract_text
 
 from pandas import read_excel
 
-from src.sqlite_db import *
-from src.employee import *
+from dotenv import load_dotenv
+
+from src.db_sqlite import *
+from src.data_employee import *
+
+load_dotenv()
 
 sqlite_path = './main.db'
 
@@ -24,66 +30,72 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 t = Jinja2Templates(directory="templates")
 
-@app.get("/app", response_class=HTMLResponse)
+
+@app.get('/', response_class=HTMLResponse)
+async def get_index(r: Request):
+    return t.TemplateResponse(
+        request=r, name='page_guest_home.html', context={"id": id}
+    )
+
+
+@app.get("/admin", response_class=HTMLResponse)
 async def read_item(r: Request):
     conn = sqlite_connection(sqlite_path)
     cursor = conn.cursor()
-    sql, params = Employee.sql_all()
+    sql, params = Employee.sql_select_all()
     cursor.execute(sql, params)
     rows = cursor.fetchall()
     employees = Employee.many_from_db_rows(rows)
     conn.close()
     return t.TemplateResponse(
-        request=r, name="page_app_home.html", context={"id": id, "employees": employees}
+        request=r, name="page_admin_home.html", context={"id": id, "employees": employees}
     )
 
-@app.get("/app/cfa_locations", response_class=HTMLResponse)
+@app.get("/admin/cfa_locations", response_class=HTMLResponse)
 async def get_app_locations(r: Request):
     conn = sqlite_connection(sqlite_path)
     cursor = conn.cursor()
-    sql, params = CfaLocation.sql_all()
+    sql, params = CfaLocation.sql_select_all()
     cursor.execute(sql, params)
     rows = cursor.fetchall()
     cfa_locations = CfaLocation.many_from_db_rows(rows)
     conn.close()
     return t.TemplateResponse(
-        request=r, name="page_app_locations.html", context={"id": id, "cfa_locations": cfa_locations}
+        request=r, name="page_admin_cfa_locations.html", context={"id": id, "cfa_locations": cfa_locations}
     )
 
-@app.get("/app/employees", response_class=HTMLResponse)
+@app.get('/admin/cfa_location/{id}')
+async def get_app_cfa_location(r: Request, id: int):
+    conn = sqlite_connection(sqlite_path)
+    cursor = conn.cursor()
+    sql, params = CfaLocation.sql_select_one(id)
+    cursor.execute(sql, params)
+    row = cursor.fetchone()
+    cfa_location = CfaLocation.one_from_db_row(row)
+    conn.close()
+    return t.TemplateResponse(request=r, name='page_admin_cfa_location.html', context={'id': id, 'cfa_location': cfa_location})
+
+@app.get("/admin/employees", response_class=HTMLResponse)
 async def get_app_employees(r: Request):
     conn = sqlite_connection(sqlite_path)
     cursor = conn.cursor()
-    sql, params = Employee.sql_all()
+    sql, params = Employee.sql_select_all()
     cursor.execute(sql, params)
     rows = cursor.fetchall()
     employees = Employee.many_from_db_rows(rows)
     conn.close()
     return t.TemplateResponse(
-        request=r, name="page_app_employees.html", context={"id": id, "employees": employees}
+        request=r, name="page_admin_employees.html", context={"id": id, "employees": employees}
     )
 
-@app.get("/app/time_punch", response_class=HTMLResponse)
-async def get_app_time_punch(r: Request):
-    conn = sqlite_connection(sqlite_path)
-    cursor = conn.cursor()
-    sql, params = Employee.sql_all()
-    cursor.execute(sql, params)
-    rows = cursor.fetchall()
-    employees = Employee.many_from_db_rows(rows)
-    conn.close()
-    return t.TemplateResponse(
-        request=r, name="page_app_time_punch.html", context={"id": id}
-    )
-
-@app.post("/form/tp")
-async def post_form_tp(
-    file: Annotated[UploadFile, File()],
+@app.post('/form/login')
+async def post_login(
+    username: str | None = Form(None),
+    password: str | None = Form(None),
 ):
-    contents = await file.read()
-    text = extract_text(io.BytesIO(contents))
-    return RedirectResponse(url="/", status_code=303)
-
+    if username == os.getenv('ADMIN_USERNAME') and password == os.getenv('ADMIN_PASSWORD'):
+        return RedirectResponse(url='/admin', status_code=303)
+    return RedirectResponse(url='/', status_code=303)
 
 @app.post("/form/employees/create")
 async def post_form_employees_create(
@@ -108,8 +120,8 @@ async def post_form_employees_create(
 
 @app.post('/form/cfa_location/create')
 async def post_form_cfa_location_create(
-    name: str = Form(str), 
-    number:str = Form(str)
+    name: str | None = Form(None), 
+    number:str | None = Form(None)
 ):
     conn = sqlite_connection(sqlite_path)
     cursor = conn.cursor()
@@ -118,6 +130,25 @@ async def post_form_cfa_location_create(
     cursor.execute(sql, params)
     conn.commit()
     conn.close()
-    return RedirectResponse(url="/app/cfa_locations", status_code=303)
+    return RedirectResponse(url="/admin/cfa_locations", status_code=303)
+
+@app.post('/form/cfa_location/delete/{id}')
+async def post_form_cfa_location_delete(r: Request, id: int, cfa_location_number: int | None = Form(None)):
+    conn = sqlite_connection(sqlite_path)
+    cursor = conn.cursor()
+    get_sql, get_params = CfaLocation.sql_select_one(id)
+    cursor.execute(get_sql, get_params)
+    row = cursor.fetchone()
+    if row == None:
+        return JSONResponse({'message': 'unauthorized'}, 401)
+    cfa_location = CfaLocation.one_from_db_row(row)
+    if cfa_location.number != cfa_location_number:
+        print(cfa_location.number, cfa_location_number)
+        return JSONResponse({'message': 'unauthorized'}, 401)
+    delete_sql, delete_params = CfaLocation.sql_delete_by_id(id)
+    cursor.execute(delete_sql, delete_params)
+    conn.commit()
+    conn.close()
+    return RedirectResponse('/admin/cfa_locations', 303)
 
 

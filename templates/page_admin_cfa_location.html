@@ -1,0 +1,15 @@
+{% extends "layout_admin.html" %}
+{% block title %}Locations{% endblock %}
+{% block content %}
+    <h1>({{ cfa_location.number }}) {{ cfa_location.name }} - CFA Suite</h1>
+
+    <form method="post" action="/form/cfa_location/delete/{{ cfa_location.id }}">
+        <h2>Delete CFA Location</h2>
+        <div>
+            <label>location number</label>
+            <input type="text" name="cfa_location_number" />
+        </div>
+        <input type="submit">
+    </form>
+
+{% endblock %}
