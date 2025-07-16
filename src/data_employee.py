@@ -20,13 +20,14 @@ class EmployeeDepartment:
         self.name = name
 
 class Employee:
-    def __init__(self, tp_name: str, cfa_location_id: str):
-        self.id = 0
+    def __init__(self, tp_name: str, cfa_location_id: str, full_name: str | None = None, id: int = 0, department = EmployeeDepartment('INIT')):
+        self.id = id
         self.tp_name = tp_name
         self.cfa_location_id = cfa_location_id
-        name_parts = self.tp_name.split(',')
-        self.full_name = f"{name_parts[1]} {name_parts[0]}"
-        self.department = EmployeeDepartment("INIT")
+        if full_name == None:
+            name_parts = self.tp_name.split(',')
+            self.full_name = f"{name_parts[1]} {name_parts[0]}"
+        self.department = department
     def __str__(self):
         return f"""TP NAME: {self.tp_name}\n
 FULL_NAME: {self.full_name}\n
@@ -51,34 +52,53 @@ DEPARTMENT: {self.department}\n
         return sql, params
     
     @staticmethod
+    def sql_find_by_id(id: str):
+        sql = 'SELECT * FROM employees WHERE id = ?'
+        params = (id,)
+        return sql, params
+    
+    @staticmethod
     def sql_find_all_by_cfa_location_id(cfa_location_id: int):
         sql = f'''SELECT * FROM employees WHERE cfa_location_id = ?'''  
         params = (cfa_location_id,)
         return sql, params
+    
+    @staticmethod
+    def sql_delete_by_id(id: int):
+        sql = 'DELETE FROM employees WHERE id = ?'
+        params = (id,)
+        return sql, params
+    
+    @staticmethod
+    def one_from_db_row(row: tuple):
+        (id, cfa_location_id, tp_name, full_name, department) = row
+        employee = Employee(tp_name, cfa_location_id, full_name, id, department)
+        return employee
 
     @staticmethod
     def many_from_db_rows(rows: list):
         employees = []
         for row in rows:
             (id, cfa_location_id, tp_name, full_name, department) = row
-            employee = {
-                'id': id,
-                'cfa_location_id': cfa_location_id,
-                'tp_name': tp_name,
-                'full_name': full_name,
-                'department': department,
-            }
+            employee = Employee(tp_name, cfa_location_id, full_name, id, department)
             employees.append(employee)
         return employees
+
+    @staticmethod
+    def sql_update_department(department: str, id: str):
+        sql = 'UPDATE employees SET department = ? WHERE id = ?'
+        params = (department, id)
+        return sql, params
 
     @staticmethod
     def sql_table():
         return '''
             CREATE TABLE IF NOT EXISTS employees (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                cfa_location_id INTEGER NOT NULL,
+                cfa_location_id_str INTEGER NOT NULL,
                 tp_name TEXT NOT NULL,
                 full_name TEXT NOT NULL,
                 department TEXT NOT NULL
             )
         '''
+    

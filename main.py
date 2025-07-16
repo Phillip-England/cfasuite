@@ -79,10 +79,24 @@ async def get_app_cfa_location(r: Request, id: int):
     sql_employee, params_employee = Employee.sql_find_all_by_cfa_location_id(cfa_location.id)
     cursor.execute(sql_employee, params_employee)
     rows = cursor.fetchall()
-    print(rows)
     employees = Employee.many_from_db_rows(rows)
     conn.close()
     return t.TemplateResponse(request=r, name='page_admin_cfa_location.html', context={'id': id, 'cfa_location': cfa_location, 'employees': employees})
+
+@app.get('/admin/cfa_location/{cfa_location_id}/employee/{employee_id}')
+async def get_admin_cfa_location_employee(r: Request, employee_id: int, cfa_location_id: int):
+    conn = sqlite_connection(sqlite_path)
+    cursor = conn.cursor()
+    sql_employee, param_employee = Employee.sql_find_by_id(employee_id)
+    cursor.execute(sql_employee, param_employee)
+    row = cursor.fetchone()
+    employee = Employee.one_from_db_row(row)
+    conn.close()
+    return t.TemplateResponse(r, 'page_admin_employee.html', {
+        'employee': employee,
+        'cfa_location_id': cfa_location_id,
+    })
+
 
 @app.post('/form/login')
 async def post_login(
@@ -93,13 +107,16 @@ async def post_login(
         return RedirectResponse(url='/admin', status_code=303)
     return RedirectResponse(url='/', status_code=303)
 
-@app.post("/form/employees/create")
+@app.post("/form/upload/employee_bio")
 async def post_form_employees_create(
     file: Annotated[UploadFile, File()],
-    cfa_location_id: str = Form(str)
+    cfa_location_id: str | None = Form(None)
 ):
     conn = sqlite_connection(sqlite_path)
     cursor = conn.cursor()
+    sql_employees, params_employees = Employee.sql_find_all_by_cfa_location_id(cfa_location_id)
+    rows_employees = cursor.execute(sql_employees, params_employees)
+    employees = Employee.many_from_db_rows(rows_employees)
     contents = await file.read()
     df = read_excel(BytesIO(contents))
     reader = EmployeeBioReader(df)
@@ -108,12 +125,14 @@ async def post_form_employees_create(
         sql, params = employee.sql_find_by_name()
         cursor.execute(sql, params)
         row = cursor.fetchone()
+        print(row)
         if row == None:
             sql_again, params_again = employee.sql_insert_one()
+            print(sql_again, params_again)
             cursor.execute(sql_again, params_again)
     conn.commit()
     conn.close()
-    return RedirectResponse(url="/", status_code=303)
+    return RedirectResponse(url=f"/admin/cfa_location/{cfa_location_id}", status_code=303)
 
 @app.post('/form/cfa_location/create')
 async def post_form_cfa_location_create(
@@ -152,5 +171,22 @@ async def post_form_cfa_location_delete(r: Request, id: int, cfa_location_number
     conn.commit()
     conn.close()
     return RedirectResponse('/admin/cfa_locations', 303)
+
+@app.post('/form/employee/update/department')
+async def post_form_employee_update_department(
+    r: Request,
+    department: str | None = Form(None),
+    employee_id: str | None = Form(None),
+    location_id: str | None = Form(None),
+):
+    conn = sqlite_connection(sqlite_path)
+    cursor = conn.cursor()
+    sql_update, param_update = Employee.sql_update_department(department, employee_id)
+    cursor.execute(sql_update, param_update)
+
+    conn.commit()
+    conn.close()
+    return RedirectResponse(f'/admin/cfa_location/{location_id}', 303)
+    
 
 

@@ -12,7 +12,7 @@
         <input type="submit">
     </form>
 
-    <form action="/form/employees/create" method="POST" enctype="multipart/form-data">
+    <form action="/form/upload/employee_bio" method="POST" enctype="multipart/form-data">
         <h2>Upload Employee Bio</h2>
         <input type="file" name="file"/>
         <input type="hidden" value="{{ cfa_location.id }}" name="cfa_location_id" />
@@ -21,7 +21,12 @@
 
     {% for emp in employees %}
         <li>
-            <a href="/app/employee/{{ emp.id }}">{{ emp.tp_name }}</a>
+            <a href="/admin/cfa_location/{{ cfa_location.id }}/employee/{{ emp.id }}">
+                {{ emp.tp_name }}
+                {% if emp.department == 'INIT' %}
+                    <span>*</span>
+                {% endif %}
+            </a>
         </li>
     {% endfor %}
 
