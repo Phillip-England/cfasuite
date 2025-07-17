@@ -15,8 +15,10 @@ from dotenv import load_dotenv
 
 from src.db import *
 from src.parse import *
+from src.log import *
 
 load_dotenv()
+logi_clear()
 
 sqlite_path = './main.db'
 init_conn = sqlite_connection(sqlite_path)
@@ -170,5 +172,36 @@ async def post_form_employee_update_department(
     conn.close()
     return RedirectResponse(f'/admin/cfa_location/{location_id}', 303)
     
+@app.post("/form/upload/time_punch")
+async def post_form_employees_create(
+    file: Annotated[UploadFile, File()],
+    cfa_location_id: str | None = Form(None)
+):
+    contents = await file.read()
+    time_punch_pdf = TimePunchReader(BytesIO(contents))
+    conn = sqlite_connection(sqlite_path)
+    c = conn.cursor()
+    current_employees = DataEmployee.sqlite_find_all_by_cfa_location_id(c, cfa_location_id)
+    init_cost = 0
+    boh_cost = 0
+    cst_cost = 0
+    rlt_cost = 0
+    foh_cost = 0
+    for time_punch_employee in time_punch_pdf.time_punch_employees:
+        for current_employee in current_employees:
+            if time_punch_employee.name == current_employee.time_punch_name:
+                if current_employee.department == 'INIT':
+                    init_cost += time_punch_employee.total_wages
+                if current_employee.department == 'BOH':
+                    boh_cost += time_punch_employee.total_wages
+                if current_employee.department == 'FOH':
+                    foh_cost += time_punch_employee.total_wages
+                if current_employee.department == 'CST':
+                    cst_cost += time_punch_employee.total_wages
+                if current_employee.department == 'RLT':
+                    rlt_cost += time_punch_employee.total_wages
 
-
+                break
+    print(init_cost)
+    conn.close()
+    return RedirectResponse(url=f"/admin/cfa_location/{cfa_location_id}", status_code=303)

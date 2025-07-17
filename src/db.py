@@ -4,11 +4,6 @@ def sqlite_connection(path: str):
     conn: Connection = connect(path)
     return conn
 
-def sqlite_table_cfa_locations(path: str):
-    conn = sqlite_connection(path)
-    cursor = conn.cursor()
-    cursor.execute(CfaLocation.sql_table())
-
 class DataEmployee:
     def __init__(self, id, cfa_location_id, time_punch_name, department):
         self.id = id
@@ -64,7 +59,7 @@ class DataEmployee:
 
     @staticmethod
     def sqlite_find_all_by_cfa_location_id(c: Cursor, cfa_location_id: str):
-        sql = f'''SELECT * FROM employees WHERE cfa_location_id = ?'''  
+        sql = f'''SELECT * FROM employees WHERE cfa_location_id = ? ORDER BY time_punch_name ASC'''  
         params = (cfa_location_id,)
         c.execute(sql, params)
         rows = c.fetchall()

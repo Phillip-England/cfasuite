@@ -1,4 +1,4 @@
-{% extends "layout_admin.html" %}
+{% extends "layout/admin.html" %}
 {% block title %}Locations{% endblock %}
 {% block content %}
     <h1>({{ cfa_location.number }}) {{ cfa_location.name }} - CFA Suite</h1>
@@ -19,13 +19,18 @@
         <input type="submit"/>
     </form>
 
+    <form action="/form/upload/time_punch" method="POST" enctype="multipart/form-data">
+        <h2>Upload Time Punch</h2>
+        <input type="file" name="file"/>
+        <input type="hidden" value="{{ cfa_location.id }}" name="cfa_location_id" />
+        <input type="submit"/>
+    </form>
+
     {% for emp in employees %}
         <li>
+            <span>[{{ emp.department }}] - </span>
             <a href="/admin/cfa_location/{{ cfa_location.id }}/employee/{{ emp.id }}">
                 {{ emp.time_punch_name }}
-                {% if emp.department == 'INIT' %}
-                    <span>*</span>
-                {% endif %}
             </a>
         </li>
     {% endfor %}

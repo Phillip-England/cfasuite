@@ -1,4 +1,4 @@
-{% extends "layout_admin.html" %}
+{% extends "layout/admin.html" %}
 {% block title %}Employees{% endblock %}
 {% block content %}
     <h1>{{ employee.time_punch_name }} - CFA Suite</h1>
@@ -8,19 +8,32 @@
             <label>Department</label>
             <select name="department">
                 <option>{{ employee.department }}</option>
-                {% if employee.department == 'INIT' %}
-                <option>FOH</option>
+                {% if employee.department == 'FOH' %}
                 <option>BOH</option>
-                <option>DIRECTOR</option>
-                {% elif employee.department == 'FOH' %}
-                <option>BOH</option>
-                <option>DIRECTOR</option>
+                <option>CST</option>
+                <option>RLT</option>
+                <option>NONE</option>
                 {% elif employee.department == 'BOH' %}
                 <option>FOH</option>
-                <option>DIRECTOR</option>
+                <option>CST</option>
+                <option>RLT</option>
+                <option>NONE</option>
+                {% elif employee.department == 'CST' %}
+                <option>FOH</option>
+                <option>BOH</option>
+                <option>RLT</option>
+                <option>NONE</option>
+                {% elif employee.department == 'RLT' %}
+                <option>FOH</option>
+                <option>BOH</option>
+                <option>CST</option>
+                <option>NONE</option>
                 {% else %}
                 <option>FOH</option>
                 <option>BOH</option>
+                <option>CST</option>
+                <option>RLT</option>
+                <option>NONE</option>
                 {% endif %}
             </select>
         </div>
