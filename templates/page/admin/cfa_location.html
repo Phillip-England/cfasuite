@@ -22,7 +22,7 @@
     {% for emp in employees %}
         <li>
             <a href="/admin/cfa_location/{{ cfa_location.id }}/employee/{{ emp.id }}">
-                {{ emp.tp_name }}
+                {{ emp.time_punch_name }}
                 {% if emp.department == 'INIT' %}
                     <span>*</span>
                 {% endif %}

@@ -1,6 +1,5 @@
 import os
 
-import io
 from io import BytesIO
 
 from typing import Annotated, Optional
@@ -10,93 +9,78 @@ from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from pdfminer.high_level import extract_text
-
 from pandas import read_excel
 
 from dotenv import load_dotenv
 
-from src.db_sqlite import *
-from src.data_employee import *
+from src.db import *
+from src.parse import *
 
 load_dotenv()
 
 sqlite_path = './main.db'
-
-sqlite_table_cfa_locations(sqlite_path)
-sqlite_table_employees(sqlite_path)
+init_conn = sqlite_connection(sqlite_path)
+init_cursor = init_conn.cursor()
+DataCfaLocation.sqlite_create_table(init_cursor)
+DataEmployee.sqlite_create_table(init_cursor)
+init_conn.commit()
+init_conn.close()
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 t = Jinja2Templates(directory="templates")
 
-@app.get('/err', response_class=HTMLResponse)
-async def get_err(r: Request, status: Optional[str] = '200', message: Optional[str] = 'no error present'):
-    print(status)
-    return t.TemplateResponse(r, 'page_err.html', {'id': id, 'status': status, 'message': message})
-
-
 @app.get('/', response_class=HTMLResponse)
-async def get_index(r: Request):
-    return t.TemplateResponse(
-        request=r, name='page_guest_home.html', context={"id": id}
+async def get_index(request: Request):
+    return t.TemplateResponse(request, 'page/guest/home.html', {}
     )
 
 @app.get("/admin", response_class=HTMLResponse)
-async def read_item(r: Request):
-    return t.TemplateResponse(
-        request=r, name="page_admin_home.html", context={"id": id}
-    )
+async def read_item(request: Request):
+    return t.TemplateResponse(request, "page/admin/home.html", {})
 
 @app.get("/admin/cfa_locations", response_class=HTMLResponse)
 async def get_app_locations(
-    r: Request,
+    request: Request,
     err_create_location: Optional[str] = ''
 ):
     conn = sqlite_connection(sqlite_path)
-    cursor = conn.cursor()
-    sql, params = CfaLocation.sql_select_all()
-    cursor.execute(sql, params)
-    rows = cursor.fetchall()
-    cfa_locations = CfaLocation.many_from_db_rows(rows)
+    c = conn.cursor()
+    cfa_locations = DataCfaLocation.sqlite_find_all(c)
     conn.close()
-    return t.TemplateResponse(
-        request=r, name="page_admin_cfa_locations.html", context={
+    return t.TemplateResponse(request, "page/admin/cfa_locations.html", {
             "id": id, 
             "cfa_locations": cfa_locations,
             'err_create_location': err_create_location,
         }
     )
 
-@app.get('/admin/cfa_location/{id}')
-async def get_app_cfa_location(r: Request, id: int):
+@app.get('/admin/cfa_location/{location_id}')
+async def get_app_cfa_location(request: Request, location_id: int):
     conn = sqlite_connection(sqlite_path)
-    cursor = conn.cursor()
-    sql, params = CfaLocation.sql_find_by_id(id)
-    cursor.execute(sql, params)
-    row = cursor.fetchone()
-    cfa_location = CfaLocation.one_from_db_row(row)
-    sql_employee, params_employee = Employee.sql_find_all_by_cfa_location_id(cfa_location.id)
-    cursor.execute(sql_employee, params_employee)
-    rows = cursor.fetchall()
-    employees = Employee.many_from_db_rows(rows)
+    c = conn.cursor()
+    cfa_location = DataCfaLocation.sqlite_find_by_id(c, location_id)
+    employees = DataEmployee.sqlite_find_all_by_cfa_location_id(c, cfa_location.id)
     conn.close()
-    return t.TemplateResponse(request=r, name='page_admin_cfa_location.html', context={'id': id, 'cfa_location': cfa_location, 'employees': employees})
+    return t.TemplateResponse(request, 'page/admin/cfa_location.html', context={''
+        'cfa_location': cfa_location, 
+        'employees': employees
+    })
 
 @app.get('/admin/cfa_location/{cfa_location_id}/employee/{employee_id}')
-async def get_admin_cfa_location_employee(r: Request, employee_id: int, cfa_location_id: int):
+async def get_admin_cfa_location_employee(
+    request: Request, 
+    employee_id: int, 
+    cfa_location_id: int
+):
     conn = sqlite_connection(sqlite_path)
-    cursor = conn.cursor()
-    sql_employee, param_employee = Employee.sql_find_by_id(employee_id)
-    cursor.execute(sql_employee, param_employee)
-    row = cursor.fetchone()
-    employee = Employee.one_from_db_row(row)
+    c = conn.cursor()
+    employee = DataEmployee.sqlite_find_by_id(c, employee_id)
     conn.close()
-    return t.TemplateResponse(r, 'page_admin_employee.html', {
+    return t.TemplateResponse(request, 'page/admin/employee.html', {
         'employee': employee,
         'cfa_location_id': cfa_location_id,
     })
-
 
 @app.post('/form/login')
 async def post_login(
@@ -113,23 +97,30 @@ async def post_form_employees_create(
     cfa_location_id: str | None = Form(None)
 ):
     conn = sqlite_connection(sqlite_path)
-    cursor = conn.cursor()
-    sql_employees, params_employees = Employee.sql_find_all_by_cfa_location_id(cfa_location_id)
-    rows_employees = cursor.execute(sql_employees, params_employees)
-    employees = Employee.many_from_db_rows(rows_employees)
+    c = conn.cursor()
     contents = await file.read()
     df = read_excel(BytesIO(contents))
     reader = EmployeeBioReader(df)
-    for name in reader.names:
-        employee = Employee(name, cfa_location_id)
-        sql, params = employee.sql_find_by_name()
-        cursor.execute(sql, params)
-        row = cursor.fetchone()
-        print(row)
-        if row == None:
-            sql_again, params_again = employee.sql_insert_one()
-            print(sql_again, params_again)
-            cursor.execute(sql_again, params_again)
+    current_employees = DataEmployee.sqlite_find_all_by_cfa_location_id(c, cfa_location_id)
+    reader_names = reader.names
+    for name in reader_names:
+        found = False
+        for employee in current_employees:
+            if name == employee.time_punch_name:
+                found = True
+                break
+        if found == False:
+            DataEmployee.sqlite_insert_one(c, name, 'INIT', cfa_location_id) 
+    conn.commit()
+    current_employees = DataEmployee.sqlite_find_all_by_cfa_location_id(c, cfa_location_id)          
+    for employee in current_employees:
+        found = False
+        for name in reader_names:
+            if name == employee.time_punch_name:
+                found = True
+                break
+        if found == False:
+            DataEmployee.sqlite_delete_by_id(c, employee.id) 
     conn.commit()
     conn.close()
     return RedirectResponse(url=f"/admin/cfa_location/{cfa_location_id}", status_code=303)
@@ -140,50 +131,41 @@ async def post_form_cfa_location_create(
     number:str | None = Form(None)
 ):
     conn = sqlite_connection(sqlite_path)
-    cursor = conn.cursor()
-    existing_sql, existing_params = CfaLocation.sql_find_by_number(number)
-    cursor.execute(existing_sql, existing_params)
-    potential_row = cursor.fetchone()
-    if potential_row != None:
+    c = conn.cursor()
+    potential_location = DataCfaLocation.sqlite_find_by_number(c, number)
+    if potential_location != None:
         return RedirectResponse('/admin/cfa_locations?err_create_location=location with provided number already exists', 303)
-    cfa_location = CfaLocation(name, number)
-    sql, params = cfa_location.sql_insert_one()
-    cursor.execute(sql, params)
+    DataCfaLocation.sqlite_insert_one(c, name, number)
     conn.commit()
     conn.close()
     return RedirectResponse(url="/admin/cfa_locations", status_code=303)
 
 @app.post('/form/cfa_location/delete/{id}')
-async def post_form_cfa_location_delete(r: Request, id: int, cfa_location_number: int | None = Form(None)):
+async def post_form_cfa_location_delete(
+    id: int,
+    cfa_location_number: int | None = Form(None)
+):
     conn = sqlite_connection(sqlite_path)
-    cursor = conn.cursor()
-    get_sql, get_params = CfaLocation.sql_find_by_id(id)
-    cursor.execute(get_sql, get_params)
-    row = cursor.fetchone()
-    if row == None:
+    c = conn.cursor()
+    cfa_location = DataCfaLocation.sqlite_find_by_id(c, id)
+    if cfa_location == None:
         return JSONResponse({'message': 'unauthorized'}, 401)
-    cfa_location = CfaLocation.one_from_db_row(row)
     if cfa_location.number != cfa_location_number:
-        print(cfa_location.number, cfa_location_number)
         return JSONResponse({'message': 'unauthorized'}, 401)
-    delete_sql, delete_params = CfaLocation.sql_delete_by_id(id)
-    cursor.execute(delete_sql, delete_params)
+    DataCfaLocation.sqlite_delete_by_id(c, id)
     conn.commit()
     conn.close()
     return RedirectResponse('/admin/cfa_locations', 303)
 
 @app.post('/form/employee/update/department')
 async def post_form_employee_update_department(
-    r: Request,
     department: str | None = Form(None),
     employee_id: str | None = Form(None),
     location_id: str | None = Form(None),
 ):
     conn = sqlite_connection(sqlite_path)
-    cursor = conn.cursor()
-    sql_update, param_update = Employee.sql_update_department(department, employee_id)
-    cursor.execute(sql_update, param_update)
-
+    c = conn.cursor()
+    DataEmployee.sqlite_update_department(c, employee_id, department)
     conn.commit()
     conn.close()
     return RedirectResponse(f'/admin/cfa_location/{location_id}', 303)
