@@ -13,6 +13,8 @@ from pandas import read_excel
 
 from dotenv import load_dotenv
 
+from decimal import Decimal, ROUND_HALF_UP
+
 from src.db import *
 from src.parse import *
 from src.log import *
@@ -67,21 +69,6 @@ async def get_app_cfa_location(request: Request, location_id: int):
     return t.TemplateResponse(request, 'page/admin/cfa_location.html', context={''
         'cfa_location': cfa_location, 
         'employees': employees
-    })
-
-@app.get('/admin/cfa_location/{cfa_location_id}/employee/{employee_id}')
-async def get_admin_cfa_location_employee(
-    request: Request, 
-    employee_id: int, 
-    cfa_location_id: int
-):
-    conn = sqlite_connection(sqlite_path)
-    c = conn.cursor()
-    employee = DataEmployee.sqlite_find_by_id(c, employee_id)
-    conn.close()
-    return t.TemplateResponse(request, 'page/admin/employee.html', {
-        'employee': employee,
-        'cfa_location_id': cfa_location_id,
     })
 
 @app.post('/form/login')
@@ -200,8 +187,24 @@ async def post_form_employees_create(
                     cst_cost += time_punch_employee.total_wages
                 if current_employee.department == 'RLT':
                     rlt_cost += time_punch_employee.total_wages
-
                 break
-    print(init_cost)
+    foh_percentage = ((foh_cost*100)/time_punch_pdf.total_wages).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    rlt_percentage = ((rlt_cost*100)/time_punch_pdf.total_wages).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    cst_percentage = ((cst_cost*100)/time_punch_pdf.total_wages).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    boh_percentage = ((boh_cost*100)/time_punch_pdf.total_wages).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+    
+    breakdown = f'''
+        INIT COST: {init_cost}
+        BOH_COST: {boh_cost}
+        BOH_%: {boh_percentage}%
+        FOH_COST: {foh_cost}
+        FOH_%: {foh_percentage}%
+        CST_COST: {cst_cost}
+        CST_%: {cst_percentage}%
+        RLT_COST: {rlt_cost}
+        RLT_%: {rlt_percentage}%
+        TOTAL_COST: {time_punch_pdf.total_wages}
+    '''
+    print(breakdown)
     conn.close()
     return RedirectResponse(url=f"/admin/cfa_location/{cfa_location_id}", status_code=303)

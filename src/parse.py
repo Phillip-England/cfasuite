@@ -1,8 +1,6 @@
-from io import BytesIO
-
-from pdfminer.high_level import extract_text
 from PyPDF2 import PdfReader
-import fitz
+
+from decimal import Decimal, getcontext
 
 from pandas import DataFrame
 
@@ -88,13 +86,13 @@ class TimePunchReader:
             total = totals[i]
             total_trimmed = total.replace('Employee Totals ', '')
             parts = total_trimmed.split(' ')
-            time_punch_employee = TimePunchEmployee(name, parts[0], parts[1], float(parts[2].replace('$', '').replace(',', '')), parts[3], float(parts[4].replace('$', '').replace(',', '')), float(parts[5].replace('$', '').replace(',', '')))
+            time_punch_employee = TimePunchEmployee(name, parts[0], parts[1], Decimal(parts[2].replace('$', '').replace(',', '')), parts[3], Decimal(parts[4].replace('$', '').replace(',', '')), Decimal(parts[5].replace('$', '').replace(',', '')))
             self.time_punch_employees.append(time_punch_employee)
         grand_total_line = grand_total_line.replace('All Employees Grand Total ', '')
         grand_total_parts = grand_total_line.split(' ')
         self.total_time = grand_total_parts[0]
         self.regular_hours = grand_total_parts[1]
-        self.regular_wages = float(grand_total_parts[2].replace('$', '').replace(',', ''))
+        self.regular_wages = Decimal(grand_total_parts[2].replace('$', '').replace(',', ''))
         self.overtime_hours = grand_total_parts[3]
-        self.overtime_wages = float(grand_total_parts[4].replace('$', '').replace(',', ''))
-        self.total_wages = float(grand_total_parts[5].replace('$', '').replace(',', ''))
+        self.overtime_wages = Decimal(grand_total_parts[4].replace('$', '').replace(',', ''))
+        self.total_wages = Decimal(grand_total_parts[5].replace('$', '').replace(',', ''))

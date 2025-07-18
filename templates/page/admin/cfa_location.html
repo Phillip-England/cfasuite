@@ -26,13 +26,80 @@
         <input type="submit"/>
     </form>
 
-    {% for emp in employees %}
-        <li>
-            <span>[{{ emp.department }}] - </span>
-            <a href="/admin/cfa_location/{{ cfa_location.id }}/employee/{{ emp.id }}">
-                {{ emp.time_punch_name }}
-            </a>
-        </li>
-    {% endfor %}
+    <table>
+        <thead>
+            <th>Name</th>
+            <th>Department</th>
+            <th>Submit</th>
+        </thead>
+        <tbody>
+            {% for employee in employees %}
+            <tr class="employee-row">
+                <td>
+                    {{ employee.time_punch_name }}
+                    {% if employee.department == 'INIT' %}
+                        <span>*</span>
+                    {% endif %}    
+                <td>
+                    <form method="post" action="/form/employee/update/department">
+                        <select name="department">
+                            <option>{{ employee.department }}</option>
+                            {% if employee.department == 'FOH' %}
+                            <option>BOH</option>
+                            <option>CST</option>
+                            <option>RLT</option>
+                            <option>NONE</option>
+                            {% elif employee.department == 'BOH' %}
+                            <option>FOH</option>
+                            <option>CST</option>
+                            <option>RLT</option>
+                            <option>NONE</option>
+                            {% elif employee.department == 'CST' %}
+                            <option>FOH</option>
+                            <option>BOH</option>
+                            <option>RLT</option>
+                            <option>NONE</option>
+                            {% elif employee.department == 'RLT' %}
+                            <option>FOH</option>
+                            <option>BOH</option>
+                            <option>CST</option>
+                            <option>NONE</option>
+                            {% else %}
+                            <option>FOH</option>
+                            <option>BOH</option>
+                            <option>CST</option>
+                            <option>RLT</option>
+                            <option>NONE</option>
+                            {% endif %}
+                        </select>
+                        <input type="hidden" value="{{ cfa_location.id }}" name="location_id" />
+                        <input type="hidden" value="{{ employee.id }}" name="employee_id" />
+                        <input type="submit" style="display:none;" class="real-submit" /> 
+                    </form>
+                </td>
+                <td>
+                    <input class="submit-proxy" type="submit" disabled /> 
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+
+    <script>
+        let rows = document.querySelectorAll('.employee-row')
+        for (let i = 0; i < rows.length; i++) {
+            let row = rows[i]
+            let form = row.querySelector('form')
+            let submitProxy = row.querySelector('.submit-proxy')
+            let realSubmit = row.querySelector('.real-submit')
+            form.addEventListener('change', () => {
+                submitProxy.removeAttribute('disabled')
+            })
+            submitProxy.addEventListener('click', () => {
+                realSubmit.click()
+            })
+        }
+    </script>
 
 {% endblock %}
