@@ -13,8 +13,6 @@ from pandas import read_excel
 
 from dotenv import load_dotenv
 
-from decimal import Decimal, ROUND_HALF_UP
-
 from src.db import *
 from src.parse import *
 from src.log import *
@@ -165,46 +163,10 @@ async def post_form_employees_create(
     cfa_location_id: str | None = Form(None)
 ):
     contents = await file.read()
-    time_punch_pdf = TimePunchReader(BytesIO(contents))
     conn = sqlite_connection(sqlite_path)
     c = conn.cursor()
     current_employees = DataEmployee.sqlite_find_all_by_cfa_location_id(c, cfa_location_id)
-    init_cost = 0
-    boh_cost = 0
-    cst_cost = 0
-    rlt_cost = 0
-    foh_cost = 0
-    for time_punch_employee in time_punch_pdf.time_punch_employees:
-        for current_employee in current_employees:
-            if time_punch_employee.name == current_employee.time_punch_name:
-                if current_employee.department == 'INIT':
-                    init_cost += time_punch_employee.total_wages
-                if current_employee.department == 'BOH':
-                    boh_cost += time_punch_employee.total_wages
-                if current_employee.department == 'FOH':
-                    foh_cost += time_punch_employee.total_wages
-                if current_employee.department == 'CST':
-                    cst_cost += time_punch_employee.total_wages
-                if current_employee.department == 'RLT':
-                    rlt_cost += time_punch_employee.total_wages
-                break
-    foh_percentage = ((foh_cost*100)/time_punch_pdf.total_wages).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-    rlt_percentage = ((rlt_cost*100)/time_punch_pdf.total_wages).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-    cst_percentage = ((cst_cost*100)/time_punch_pdf.total_wages).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-    boh_percentage = ((boh_cost*100)/time_punch_pdf.total_wages).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-    
-    breakdown = f'''
-        INIT COST: {init_cost}
-        BOH_COST: {boh_cost}
-        BOH_%: {boh_percentage}%
-        FOH_COST: {foh_cost}
-        FOH_%: {foh_percentage}%
-        CST_COST: {cst_cost}
-        CST_%: {cst_percentage}%
-        RLT_COST: {rlt_cost}
-        RLT_%: {rlt_percentage}%
-        TOTAL_COST: {time_punch_pdf.total_wages}
-    '''
-    print(breakdown)
+    time_punch_pdf = TimePunchReader(BytesIO(contents), current_employees)
+    print(time_punch_pdf)
     conn.close()
     return RedirectResponse(url=f"/admin/cfa_location/{cfa_location_id}", status_code=303)
