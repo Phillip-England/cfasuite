@@ -13,16 +13,84 @@
         <input type="submit">
     </form>
 
-    <form action="/form/upload/employee_bio" method="POST" enctype="multipart/form-data">
-        <h2>Upload Employee Bio</h2>
+    <form action="/form/upload/time_punch" method="POST" enctype="multipart/form-data">
+        <h2>Upload Time Punch</h2>
         <input type="file" name="file"/>
         <input type="hidden" value="{{ cfa_location.id }}" name="cfa_location_id" />
         <input type="hidden" value="{{ session_key }}" name="session_key" />
         <input type="submit"/>
     </form>
 
-    <form action="/form/upload/time_punch" method="POST" enctype="multipart/form-data">
-        <h2>Upload Time Punch</h2>
+    {% if time_punch_data %}
+        <h3>Total Breakdown</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Hours</th>
+                    <th>Wages</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Regular</td>
+                    <td>{{ time_punch_data['regular_hours'] }}</td>
+                    <td>{{ time_punch_data['regular_wages'] }}</td>
+                </tr>
+                <tr>
+                    <td>Overtime</td>
+                    <td>{{ time_punch_data['overtime_hours'] }}</td>
+                    <td>{{ time_punch_data['overtime_wages'] }}</td>
+                </tr>
+                <tr>
+                    <td>Total</td>
+                    <td>{{ time_punch_data['total_hours'] }}</td>
+                    <td>{{ time_punch_data['total_wages'] }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Department Breakdown</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Department</th>
+                    <th>Percentage</th>
+                    <th>Cost</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>FOH</td>
+                    <td>{{ time_punch_data['foh_percentage'] }}</td>
+                    <td>{{ time_punch_data['foh_cost'] }}</td>
+                </tr>
+                <tr>
+                    <td>BOH</td>
+                    <td>{{ time_punch_data['boh_percentage'] }}</td>
+                    <td>{{ time_punch_data['boh_cost'] }}</td>
+                </tr>
+                <tr>
+                    <td>RLT</td>
+                    <td>{{ time_punch_data['rlt_percentage'] }}</td>
+                    <td>{{ time_punch_data['rlt_cost'] }}</td>
+                </tr>
+                <tr>
+                    <td>CST</td>
+                    <td>{{ time_punch_data['cst_percentage'] }}</td>
+                    <td>{{ time_punch_data['cst_cost'] }}</td>
+                </tr>
+                <tr>
+                    <td>TERM</td>
+                    <td>{{ time_punch_data['term_percentage'] }}</td>
+                    <td>{{ time_punch_data['term_cost'] }}</td>
+                </tr>
+            </tbody>
+        </table>
+    {% endif %}
+
+    <form action="/form/upload/employee_bio" method="POST" enctype="multipart/form-data">
+        <h2>Upload Employee Bio</h2>
         <input type="file" name="file"/>
         <input type="hidden" value="{{ cfa_location.id }}" name="cfa_location_id" />
         <input type="hidden" value="{{ session_key }}" name="session_key" />

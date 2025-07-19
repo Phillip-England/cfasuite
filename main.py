@@ -2,6 +2,8 @@ import os
 
 from io import BytesIO
 
+import json
+
 from typing import Annotated, Optional
 
 from fastapi import FastAPI, Request, UploadFile, File, Form, Response
@@ -71,7 +73,14 @@ async def get_app_locations(
     )
 
 @app.get('/admin/cfa_location/{location_id}')
-async def get_app_cfa_location(request: Request, location_id: int):
+async def get_app_cfa_location(
+    request: Request, 
+    location_id: int,
+    time_punch_json: Optional[str] = None,    
+):
+    time_punch_data = None
+    if time_punch_json:
+        time_punch_data = json.loads(time_punch_json)
     conn = sqlite_connection(sqlite_path)
     c = conn.cursor()
     session = middleware_auth(c, request, os.getenv('ADMIN_USER_ID'))
@@ -84,6 +93,7 @@ async def get_app_cfa_location(request: Request, location_id: int):
         'cfa_location': cfa_location, 
         'employees': employees,
         'session_key': session.key,
+        'time_punch_data': time_punch_data,
     })
 
 @app.post('/form/login')
@@ -216,10 +226,10 @@ async def post_form_employees_create(
     if session == None or session_key != session.key:
         return RedirectResponse('/', 303)
     current_employees = DataEmployee.sqlite_find_all_by_cfa_location_id(c, cfa_location_id)
-    time_punch_pdf = TimePunchReader(BytesIO(contents), current_employees)
-    print(time_punch_pdf)
+    time_punch_pdf = TimePunchReader(contents, current_employees)
+    logi(time_punch_pdf.__str__())
     conn.close()
-    return RedirectResponse(url=f"/admin/cfa_location/{cfa_location_id}", status_code=303)
+    return RedirectResponse(url=f"/admin/cfa_location/{cfa_location_id}?time_punch_json={time_punch_pdf.to_json()}", status_code=303)
 
 def middleware_auth(c: Cursor, request: Request, user_id: str):
     session_id = request.cookies.get('APP_SESSION_ID')

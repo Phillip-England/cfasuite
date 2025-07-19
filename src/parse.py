@@ -1,5 +1,11 @@
 from PyPDF2 import PdfReader
 
+from io import BytesIO
+
+import json
+
+from urllib.parse import quote
+
 from decimal import Decimal, ROUND_HALF_UP
 
 from pandas import DataFrame
@@ -21,27 +27,28 @@ class TimePunchEmployee:
         self.name = name
         self.total_time = total_time
         self.regular_hours = regular_hours
-        self.regular_wages = regular_wages
+        self.regular_wages = Decimal(regular_wages)
         self.overtime_hours = overtime_hours
-        self.overtime_wages = overtime_wages
-        self.total_wages = total_wages
+        self.overtime_wages = Decimal(overtime_wages)
+        self.total_wages = Decimal(total_wages)
 
 
 class TimePunchReader:
-    def __init__(self, time_punch_bytes: bytes, current_employees: list):
-        self.time_punch_bytes = time_punch_bytes
+    def __init__(self, time_punch_file: bytes, current_employees: list):
+        self.time_punch_bytes = BytesIO(time_punch_file)
 
         self.current_employees = current_employees
         self.time_punch_employees = []
 
-        self.raw_data = time_punch_bytes
         self.text = ''
 
+        self.term_cost = Decimal(0)
         self.boh_cost = Decimal(0)
         self.cst_cost = Decimal(0)
         self.rlt_cost = Decimal(0)
         self.foh_cost = Decimal(0)
 
+        self.term_percentage = 0
         self.boh_percentage = 0
         self.cst_percentage = 0
         self.rlt_percentage = 0
@@ -85,6 +92,10 @@ class TimePunchReader:
                     continue
                 if 'Sun,' in line:
                     continue
+                if 'Punch types of "Break (Conv to Paid)" were created by Time Punch due to an unpaid break that did not meet the Minimum Unpaid Break Duration setting.' in line:
+                    line = line.replace('Punch types of "Break (Conv to Paid)" were created by Time Punch due to an unpaid break that did not meet the Minimum Unpaid Break Duration setting.', '')
+                    trim.append(line)
+                    continue
                 trim.append(line)
                 continue
             if ':' in line:
@@ -126,8 +137,10 @@ class TimePunchReader:
 
     def init_department_totals(self):
         for time_punch_employee in self.time_punch_employees:
+            found = False
             for current_employee in self.current_employees:
                 if time_punch_employee.name == current_employee.time_punch_name:
+                    found = True
                     if current_employee.department == 'BOH':
                         self.boh_cost += time_punch_employee.total_wages
                     if current_employee.department == 'FOH':
@@ -137,6 +150,9 @@ class TimePunchReader:
                     if current_employee.department == 'RLT':
                         self.rlt_cost += time_punch_employee.total_wages
                     break
+            if found == False:
+                self.term_cost += time_punch_employee.total_wages
+        self.term_percentage = ((self.term_cost*100)/self.total_wages).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         self.foh_percentage = ((self.foh_cost*100)/self.total_wages).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         self.rlt_percentage = ((self.rlt_cost*100)/self.total_wages).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         self.cst_percentage = ((self.cst_cost*100)/self.total_wages).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
@@ -158,3 +174,31 @@ class TimePunchReader:
             "Employees:"
         ]
         return "\n".join(lines)
+
+    def to_json(self):
+        dict = {
+            'boh_cost': float(self.boh_cost),
+            'cst_cost': float(self.cst_cost),
+            'rlt_cost': float(self.rlt_cost),
+            'foh_cost': float(self.foh_cost),
+            'term_cost': float(self.term_cost),
+
+            'boh_percentage': float(self.boh_percentage),
+            'cst_percentage': float(self.cst_percentage),
+            'rlt_percentage': float(self.rlt_percentage),
+            'foh_percentage': float(self.foh_percentage),
+            'term_percentage': float(self.foh_percentage),
+
+            'total_hours': str(self.total_hours),
+            'regular_hours': str(self.regular_hours),
+            'overtime_hours': str(self.overtime_hours),
+
+            'regular_wages': float(self.regular_wages),
+            'overtime_wages': float(self.overtime_wages),
+            'total_wages': float(self.total_wages),
+        }
+        json_str = json.dumps(dict)
+        safe_json = quote(json_str)
+        return safe_json
+
+
