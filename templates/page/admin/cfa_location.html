@@ -9,6 +9,7 @@
             <label>location number</label>
             <input type="text" name="cfa_location_number" />
         </div>
+        <input type="hidden" value="{{ session_key }}" name="session_key" />
         <input type="submit">
     </form>
 
@@ -16,6 +17,7 @@
         <h2>Upload Employee Bio</h2>
         <input type="file" name="file"/>
         <input type="hidden" value="{{ cfa_location.id }}" name="cfa_location_id" />
+        <input type="hidden" value="{{ session_key }}" name="session_key" />
         <input type="submit"/>
     </form>
 
@@ -23,6 +25,7 @@
         <h2>Upload Time Punch</h2>
         <input type="file" name="file"/>
         <input type="hidden" value="{{ cfa_location.id }}" name="cfa_location_id" />
+        <input type="hidden" value="{{ session_key }}" name="session_key" />
         <input type="submit"/>
     </form>
 
@@ -74,6 +77,7 @@
                         </select>
                         <input type="hidden" value="{{ cfa_location.id }}" name="location_id" />
                         <input type="hidden" value="{{ employee.id }}" name="employee_id" />
+                        <input type="hidden" value="{{ session_key }}" name="session_key" />
                         <input type="submit" style="display:none;" class="real-submit" /> 
                     </form>
                 </td>
