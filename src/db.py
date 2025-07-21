@@ -225,3 +225,11 @@ class DataSession:
         sql = 'DELETE from sessions WHERE id = ?'
         c.execute(sql, (id,))
         return c.rowcount
+
+    def __str__(self):
+        return f'''
+            id: {self.id}
+            user_id: {self.user_id}
+            key: {self.key}
+            expires_at: {self.expires_at}
+        '''

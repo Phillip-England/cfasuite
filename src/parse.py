@@ -187,7 +187,7 @@ class TimePunchReader:
             'cst_percentage': float(self.cst_percentage),
             'rlt_percentage': float(self.rlt_percentage),
             'foh_percentage': float(self.foh_percentage),
-            'term_percentage': float(self.foh_percentage),
+            'term_percentage': float(self.term_percentage),
 
             'total_hours': str(self.total_hours),
             'regular_hours': str(self.regular_hours),

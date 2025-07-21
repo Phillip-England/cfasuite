@@ -20,9 +20,8 @@ from src.parse import *
 from src.log import *
 
 load_dotenv()
-logi_clear()
 
-sqlite_path = './main.db'
+sqlite_path = os.getenv('SQLITE_ABSOLUTE_PATH')
 init_conn = sqlite_connection(sqlite_path)
 init_cursor = init_conn.cursor()
 DataCfaLocation.sqlite_create_table(init_cursor)
@@ -44,7 +43,8 @@ async def get_index(request: Request):
 async def read_item(request: Request):
     conn = sqlite_connection(sqlite_path)
     c = conn.cursor()
-    session = middleware_auth(c, request, os.getenv('ADMIN_USER_ID'))
+    admin_user_id = os.getenv('ADMIN_USER_ID')
+    session = middleware_auth(c, request, admin_user_id)
     if session == None:
         return RedirectResponse('/', 303)
     conn.close()
@@ -113,7 +113,7 @@ async def post_login(
         conn.commit()
         conn.close()
         response = RedirectResponse(url='/admin', status_code=303)
-        response.set_cookie('APP_SESSION_ID', session.id, httponly=True, secure=True, samesite='strict', max_age=1800)
+        response.set_cookie('APP_SESSION_ID', session.id, httponly=True, secure=True, samesite='lax', max_age=1800)
         return response
     conn.close()
     return RedirectResponse(url='/', status_code=303)
@@ -227,7 +227,6 @@ async def post_form_employees_create(
         return RedirectResponse('/', 303)
     current_employees = DataEmployee.sqlite_find_all_by_cfa_location_id(c, cfa_location_id)
     time_punch_pdf = TimePunchReader(contents, current_employees)
-    logi(time_punch_pdf.__str__())
     conn.close()
     return RedirectResponse(url=f"/admin/cfa_location/{cfa_location_id}?time_punch_json={time_punch_pdf.to_json()}", status_code=303)
 
@@ -238,6 +237,6 @@ def middleware_auth(c: Cursor, request: Request, user_id: str):
     session = DataSession.sqlite_get_by_id(c, session_id)
     if session == None:
         return None
-    if session.user_id != user_id:
+    if str(session.user_id) != str(user_id):
         return None
     return session
