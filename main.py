@@ -1,15 +1,10 @@
-import os
-from io import BytesIO
-import json
-from typing import Annotated, Optional
 
-from fastapi import FastAPI, Request, UploadFile, File, Form, Response, Depends
-from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
+from fastapi import FastAPI, Depends
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pandas import read_excel
 from dotenv import load_dotenv
-load_dotenv() # must call BEFORE loading in modules from ./src
+load_dotenv()
 
 from src.db import *
 from src.parse import *

@@ -107,11 +107,16 @@ class TimePunchReader:
                     continue
                 trim.append(line)
                 continue
-        grand_total_line = trim.pop()
+        filtered_again = []
+        for line in trim:
+            if line.startswith('Punch'):
+                continue
+            filtered_again.append(line)
+        grand_total_line = filtered_again.pop()
         names = []
         totals = []
         toggle = 0
-        for line in trim:
+        for line in filtered_again:
             if toggle == 0:
                 names.append(line)
                 toggle = 1

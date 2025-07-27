@@ -128,13 +128,16 @@ async def post_form_upload_time_punch(
     cfa_location_id: str | None = Form(None),
     session_key:str | None = Form(None),
 ):
-    contents = await file.read()
-    conn = sqlite_connection()
-    c = conn.cursor()
-    session = middleware_auth(c, request, os.getenv('ADMIN_USER_ID'))
-    if session == None or session_key != session.key:
-        return RedirectResponse('/', 303)
-    current_employees = DataEmployee.sqlite_find_all_by_cfa_location_id(c, cfa_location_id)
-    time_punch_pdf = TimePunchReader(contents, current_employees)
-    conn.close()
-    return RedirectResponse(url=f"/admin/cfa_location/{cfa_location_id}?time_punch_json={time_punch_pdf.to_json()}", status_code=303)
+    try:
+        contents = await file.read()
+        conn = sqlite_connection()
+        c = conn.cursor()
+        session = middleware_auth(c, request, os.getenv('ADMIN_USER_ID'))
+        if session == None or session_key != session.key:
+            return RedirectResponse('/', 303)
+        current_employees = DataEmployee.sqlite_find_all_by_cfa_location_id(c, cfa_location_id)
+        time_punch_pdf = TimePunchReader(contents, current_employees)
+        conn.close()
+        return RedirectResponse(url=f"/admin/cfa_location/{cfa_location_id}?time_punch_json={time_punch_pdf.to_json()}", status_code=303)
+    except Exception as e:
+        return {"message": str(e)}
