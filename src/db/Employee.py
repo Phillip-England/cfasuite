@@ -1,6 +1,6 @@
 from sqlite3 import Cursor
 
-class DataEmployee:
+class Employee:
     def __init__(self, id, cfa_location_id, time_punch_name, department):
         self.id = id
         self.cfa_location_id = cfa_location_id
@@ -29,7 +29,7 @@ class DataEmployee:
         sql = f'''INSERT INTO employees (time_punch_name, department, cfa_location_id) VALUES (?, ?, ?)'''
         params = (time_punch_name, department, cfa_location_id,)
         c.execute(sql, params)
-        return DataEmployee(c.lastrowid, cfa_location_id, time_punch_name, department)
+        return Employee(c.lastrowid, cfa_location_id, time_punch_name, department)
 
     @staticmethod
     def sqlite_find_by_time_punch_name(c: Cursor, time_punch_name: str):
@@ -40,7 +40,7 @@ class DataEmployee:
         if row == None:
             return None
         (id, cfa_location_id, time_punch_name, department) = row
-        return DataEmployee(id, cfa_location_id, time_punch_name, department)
+        return Employee(id, cfa_location_id, time_punch_name, department)
 
     @staticmethod
     def sqlite_find_by_id(c: Cursor, id: str):
@@ -51,7 +51,7 @@ class DataEmployee:
         if row == None:
             return None
         (id, cfa_location_id, time_punch_name, department) = row
-        return DataEmployee(id, cfa_location_id, time_punch_name, department)
+        return Employee(id, cfa_location_id, time_punch_name, department)
 
     @staticmethod
     def sqlite_find_all_by_cfa_location_id(c: Cursor, cfa_location_id: str):
@@ -62,7 +62,7 @@ class DataEmployee:
         out = []
         for row in rows:
             (id, cfa_location_id, time_punch_name, department) = row
-            out.append(DataEmployee(id, cfa_location_id, time_punch_name, department))
+            out.append(Employee(id, cfa_location_id, time_punch_name, department))
         return out
 
     @staticmethod

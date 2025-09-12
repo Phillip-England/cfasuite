@@ -1,6 +1,6 @@
 from sqlite3 import Cursor
 
-class DataCfaLocation:
+class Location:
     def __init__(self, id, name, number):
         self.id = id
         self.name = name
@@ -44,7 +44,7 @@ class DataCfaLocation:
         if row == None:
             return None
         (id, name, number) = row
-        return DataCfaLocation(id, name, number)
+        return Location(id, name, number)
 
     @staticmethod
     def sqlite_find_by_number(c: Cursor, number: str):
@@ -55,7 +55,7 @@ class DataCfaLocation:
         if row == None:
             return None
         (id, name, number) = row
-        return DataCfaLocation(id, name, number)
+        return Location(id, name, number)
 
     @staticmethod
     def sqlite_find_all(c: Cursor):
@@ -66,5 +66,5 @@ class DataCfaLocation:
         out = []
         for row in rows:
             (id, name, number) = row
-            out.append(DataCfaLocation(id, name, number))
+            out.append(Location(id, name, number))
         return out

@@ -34,9 +34,9 @@ async def get_app_locations(
     session = middleware_auth(c, request, os.getenv('ADMIN_USER_ID'))
     if session == None:
         return RedirectResponse('/', 303)
-    cfa_locations = DataCfaLocation.sqlite_find_all(c)
+    cfa_locations = Location.sqlite_find_all(c)
     conn.close()
-    return context['templates'].TemplateResponse(request, "page/admin/cfa_locations.html", {
+    return context['templates'].TemplateResponse(request, "page/admin/locations.html", {
             "id": id, 
             "cfa_locations": cfa_locations,
             'err_create_location': err_create_location,
@@ -59,10 +59,10 @@ async def get_app_cfa_location(
     session = middleware_auth(c, request, os.getenv('ADMIN_USER_ID'))
     if session == None:
         return RedirectResponse('/', 303)
-    cfa_location = DataCfaLocation.sqlite_find_by_id(c, location_id)
-    employees = DataEmployee.sqlite_find_all_by_cfa_location_id(c, cfa_location.id)
+    cfa_location = Location.sqlite_find_by_id(c, location_id)
+    employees = Employee.sqlite_find_all_by_cfa_location_id(c, cfa_location.id)
     conn.close()
-    return context['templates'].TemplateResponse(request, 'page/admin/cfa_location.html', context={''
+    return context['templates'].TemplateResponse(request, 'page/admin/location.html', context={''
         'cfa_location': cfa_location, 
         'employees': employees,
         'session_key': session.key,

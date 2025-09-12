@@ -5,7 +5,7 @@ import string
 from sqlite3 import Cursor
 
 
-class DataSession:
+class Session:
     def __init__(self, id, user_id, key, expires_at):
         self.id = id
         self.user_id = user_id
@@ -35,14 +35,14 @@ class DataSession:
 
     @staticmethod
     def sqlite_insert(c: Cursor, user_id):
-        key = DataSession.generate_key()
-        expires_at = DataSession.generate_expiration()
+        key = Session.generate_key()
+        expires_at = Session.generate_expiration()
         sql = '''
             INSERT INTO sessions (user_id, key, expires_at)
             VALUES (?, ?, ?)
         '''
         c.execute(sql, (user_id, key, expires_at))
-        return DataSession(c.lastrowid, user_id, key, expires_at)
+        return Session(c.lastrowid, user_id, key, expires_at)
 
     @staticmethod
     def sqlite_get_by_id(c: Cursor, id: int):
@@ -51,7 +51,7 @@ class DataSession:
         row = c.fetchone()
         if row:
             (id, user_id, key, expires_at) = row
-            return DataSession(id, user_id, key, expires_at)
+            return Session(id, user_id, key, expires_at)
         return None
 
     def is_expired(self):
@@ -64,7 +64,7 @@ class DataSession:
         row = c.fetchone()
         if row:
             (id, user_id, key, expires_at) = row
-            return DataSession(id, user_id, key, expires_at)
+            return Session(id, user_id, key, expires_at)
         return None
     
     @staticmethod

@@ -1,17 +1,15 @@
 import os
 
-from .DataSession import *
-from .DataCfaLocation import *
-from .DataEmployee import *
+from .Session import *
+from .Location import *
+from .Employee import *
 
 from sqlite3 import Connection, connect
 
 SQLITE_ABSOLUTE_PATH = os.getenv('SQLITE_ABSOLUTE_PATH')
-
-def sqlite_connection():
-    print(SQLITE_ABSOLUTE_PATH)
-    conn: Connection = connect(SQLITE_ABSOLUTE_PATH)
-    return conn
+if SQLITE_ABSOLUTE_PATH == None:
+    print('you must create a .env file with SQLITE_ABSOLUTE_PATH set to an absolute path')
+    exit(1)
 
 def sqlite_connection():
     conn: Connection = connect(SQLITE_ABSOLUTE_PATH)
@@ -20,8 +18,8 @@ def sqlite_connection():
 def init_tables():
     init_conn = sqlite_connection()
     init_cursor = init_conn.cursor()
-    DataCfaLocation.sqlite_create_table(init_cursor)
-    DataEmployee.sqlite_create_table(init_cursor)
-    DataSession.sqlite_create_table(init_cursor)
+    Location.sqlite_create_table(init_cursor)
+    Employee.sqlite_create_table(init_cursor)
+    Session.sqlite_create_table(init_cursor)
     init_conn.commit()
     init_conn.close()
