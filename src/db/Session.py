@@ -72,6 +72,12 @@ class Session:
         sql = 'DELETE from sessions WHERE id = ?'
         c.execute(sql, (id,))
         return c.rowcount
+    
+    @staticmethod
+    def sqlite_delete_by_session_key(c: Cursor, key: str):
+        sql = 'DELETE FROM sessions WHERE key = ?'
+        c.execute(sql, (key,))
+        return c.rowcount
 
     def __str__(self):
         return f'''
@@ -80,3 +86,4 @@ class Session:
             key: {self.key}
             expires_at: {self.expires_at}
         '''
+    

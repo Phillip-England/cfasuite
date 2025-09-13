@@ -9,6 +9,7 @@ import json
 from fastapi import Request, Depends
 from fastapi.responses import RedirectResponse
 from dotenv import load_dotenv
+from pandas import read_excel
 load_dotenv()
 
 from src.db import *
@@ -19,13 +20,26 @@ from src.server import *
 
 
 # TODO
-# need logout endpoint
 
-init_tables()
+
+ADMIN_USER_ID = os.getenv('ADMIN_USER_ID')
+SQLITE_ABSOLUTE_PATH = os.getenv('SQLITE_ABSOLUTE_PATH')
+ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
+
+
+if ADMIN_USER_ID == None or SQLITE_ABSOLUTE_PATH == None or ADMIN_USERNAME == None or ADMIN_PASSWORD == None:
+    print('please configure your .env file before serving cfasuite')
+    print('checkout https://github.com/phillip-england/cfasuite for more information')
+
+
+init_tables(SQLITE_ABSOLUTE_PATH)
+
 
 app = FastAPI(dependencies=[Depends(depend_context)])
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
@@ -34,12 +48,20 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={"message": f"Oops! Something went wrong: {exc}"}
     )
 
+
 @app.get('/')
 async def get_index(
     request: Request,
     context = Depends(depend_context)
 ):
+    conn, c = sqlite_connection(SQLITE_ABSOLUTE_PATH)
+    session_id = request.cookies.get('APP_SESSION_ID')
+    session = Session.sqlite_get_by_id(c, session_id)
+    if session != None:
+        if int(session.user_id) == int(ADMIN_USER_ID):
+            return RedirectResponse('/admin', status_code=303)
     return context['templates'].TemplateResponse(request, 'page/guest/home.html', {})
+
 
 @app.post('/form/login')
 async def post_form_login(
@@ -47,29 +69,28 @@ async def post_form_login(
     username: str | None = Form(None),
     password: str | None = Form(None),
 ):
-    conn, c = sqlite_connection()
-    if username != os.getenv('ADMIN_USERNAME') and password != os.getenv('ADMIN_PASSWORD'):
+    conn, c = sqlite_connection(SQLITE_ABSOLUTE_PATH)
+    if username != ADMIN_USERNAME and password != ADMIN_PASSWORD:
         conn.close()
         return RedirectResponse(url='/', status_code=303)
-    admin_id = os.getenv('ADMIN_USER_ID')
-    potential_session = Session.sqlite_get_by_user_id(c, admin_id)
-    if potential_session != None:
-        Session.sqlite_delete_by_id(c, potential_session.id)
-    session = Session.sqlite_insert(c, admin_id)
+    pre_existing_session = Session.sqlite_get_by_user_id(c, ADMIN_USER_ID)
+    if pre_existing_session != None:
+        Session.sqlite_delete_by_id(c, pre_existing_session.id)
+    session = Session.sqlite_insert(c, ADMIN_USER_ID)
     conn.commit()
     conn.close()
     response = RedirectResponse(url='/admin', status_code=303)
     response.set_cookie('APP_SESSION_ID', session.id, httponly=True, secure=True, samesite='lax', max_age=1800)
     return response
 
+
 @app.get('/admin')
 async def get_admin(
     request: Request,
     context = Depends(depend_context)
 ):
-    conn, c = sqlite_connection()
-    admin_user_id = os.getenv('ADMIN_USER_ID')
-    session = middleware_auth(c, request, admin_user_id)
+    conn, c = sqlite_connection(SQLITE_ABSOLUTE_PATH)
+    session = middleware_auth(c, request, ADMIN_USER_ID)
     if session == None:
         return RedirectResponse('/', 303)
     conn.close()
@@ -77,14 +98,15 @@ async def get_admin(
         'session_key': session.key,
     })
 
+
 @app.get('/admin/cfa_locations')
 async def get_admin_locations(
     request: Request,
     err_create_location: Optional[str] = '',
     context = Depends(depend_context),
 ):
-    conn, c = sqlite_connection()
-    session = middleware_auth(c, request, os.getenv('ADMIN_USER_ID'))
+    conn, c = sqlite_connection(SQLITE_ABSOLUTE_PATH)
+    session = middleware_auth(c, request, ADMIN_USER_ID)
     if session == None:
         return RedirectResponse('/', 303)
     cfa_locations = Location.sqlite_find_all(c)
@@ -96,6 +118,7 @@ async def get_admin_locations(
         }
     )
 
+
 @app.get('/admin/cfa_location/{location_id}')
 async def get_app_cfa_location(
     request: Request, 
@@ -106,8 +129,8 @@ async def get_app_cfa_location(
     time_punch_data = None
     if time_punch_json:
         time_punch_data = json.loads(time_punch_json)
-    conn, c = sqlite_connection()
-    session = middleware_auth(c, request, os.getenv('ADMIN_USER_ID'))
+    conn, c = sqlite_connection(SQLITE_ABSOLUTE_PATH)
+    session = middleware_auth(c, request, ADMIN_USER_ID)
     if session == None:
         return RedirectResponse('/', 303)
     cfa_location = Location.sqlite_find_by_id(c, location_id)
@@ -121,13 +144,12 @@ async def get_app_cfa_location(
     })
 
 
-
 @app.post('/form/upload/employee_bio')
 async def post_form_employee_bio(
     file: Annotated[UploadFile, File()],
     cfa_location_id: str | None = Form(None)
 ):
-    conn, c = sqlite_connection()
+    conn, c = sqlite_connection(SQLITE_ABSOLUTE_PATH)
     contents = await file.read()
     df = read_excel(BytesIO(contents))
     reader = EmployeeBioReader(df)
@@ -155,6 +177,7 @@ async def post_form_employee_bio(
     conn.close()
     return RedirectResponse(url=f"/admin/cfa_location/{cfa_location_id}", status_code=303)
 
+
 @app.post('/form/cfa_location/create')
 async def post_form_cfa_location_create(
     request: Request,
@@ -162,8 +185,8 @@ async def post_form_cfa_location_create(
     number:str | None = Form(None),
     session_key:str | None = Form(None),
 ):
-    conn, c = sqlite_connection()
-    session = middleware_auth(c, request, os.getenv('ADMIN_USER_ID'))
+    conn, c = sqlite_connection(SQLITE_ABSOLUTE_PATH)
+    session = middleware_auth(c, request, ADMIN_USER_ID)
     if session == None or session_key != session.key:
         return RedirectResponse('/', 303)
     potential_location = Location.sqlite_find_by_number(c, number)
@@ -174,6 +197,7 @@ async def post_form_cfa_location_create(
     conn.close()
     return RedirectResponse(url="/admin/cfa_locations", status_code=303)
 
+
 @app.post('/form/cfa_location/delete/{id}')
 async def post_form_cfa_location_delete(
     request: Request,
@@ -181,8 +205,8 @@ async def post_form_cfa_location_delete(
     cfa_location_number: int | None = Form(None),
     session_key:str | None = Form(None),
 ):
-    conn, c = sqlite_connection()
-    session = middleware_auth(c, request, os.getenv('ADMIN_USER_ID'))
+    conn, c = sqlite_connection(SQLITE_ABSOLUTE_PATH)
+    session = middleware_auth(c, request, ADMIN_USER_ID)
     if session == None or session_key != session.key:
         return RedirectResponse('/', 303)
     cfa_location = Location.sqlite_find_by_id(c, id)
@@ -195,6 +219,7 @@ async def post_form_cfa_location_delete(
     conn.close()
     return RedirectResponse('/admin/cfa_locations', 303)
 
+
 @app.post('/form/employee/update/department')
 async def post_form_employee_update_department(
     request: Request,
@@ -203,8 +228,8 @@ async def post_form_employee_update_department(
     location_id: str | None = Form(None),
     session_key:str | None = Form(None),
 ):
-    conn, c = sqlite_connection()
-    session = middleware_auth(c, request, os.getenv('ADMIN_USER_ID'))
+    conn, c = sqlite_connection(SQLITE_ABSOLUTE_PATH)
+    session = middleware_auth(c, request, ADMIN_USER_ID)
     if session == None or session_key != session.key:
         return RedirectResponse('/', 303)
     Employee.sqlite_update_department(c, employee_id, department)
@@ -222,8 +247,8 @@ async def post_form_upload_time_punch(
 ):
     try:
         contents = await file.read()
-        conn, c = sqlite_connection()
-        session = middleware_auth(c, request, os.getenv('ADMIN_USER_ID'))
+        conn, c = sqlite_connection(SQLITE_ABSOLUTE_PATH)
+        session = middleware_auth(c, request, ADMIN_USER_ID)
         if session == None or session_key != session.key:
             return RedirectResponse('/', 303)
         current_employees = Employee.sqlite_find_all_by_cfa_location_id(c, cfa_location_id)
@@ -232,4 +257,26 @@ async def post_form_upload_time_punch(
         return RedirectResponse(url=f"/admin/cfa_location/{cfa_location_id}?time_punch_json={time_punch_pdf.to_json()}", status_code=303)
     except Exception as e:
         return {"message": str(e)}
+    
+
+@app.get('/form/logout')
+async def post_form_logout(
+    response: Response,
+    session_key: Optional[str] = None
+):
+    conn, c = sqlite_connection(SQLITE_ABSOLUTE_PATH)
+    if session_key == None:
+        return RedirectResponse('/', status_code=303)
+    current_session = Session.sqlite_get_by_user_id(c, ADMIN_USER_ID)
+    if current_session == None:
+        return RedirectResponse('/', status_code=303)
+    if session_key != current_session.key:
+        return RedirectResponse('/', status_code=303)
+    Session.sqlite_delete_by_session_key(c, session_key)
+    conn.commit()
+    conn.close()
+    response = RedirectResponse(url='/', status_code=303)
+    response.delete_cookie('APP_SESSION_ID', httponly=True, secure=True, samesite='lax')
+    return response
+
 

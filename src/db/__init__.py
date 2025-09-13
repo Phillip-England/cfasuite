@@ -6,17 +6,12 @@ from .Employee import *
 
 from sqlite3 import Connection, connect
 
-SQLITE_ABSOLUTE_PATH = os.getenv('SQLITE_ABSOLUTE_PATH')
-if SQLITE_ABSOLUTE_PATH == None:
-    print('you must create a .env file with SQLITE_ABSOLUTE_PATH set to an absolute path')
-    exit(1)
-
-def sqlite_connection():
-    conn: Connection = connect(SQLITE_ABSOLUTE_PATH)
+def sqlite_connection(path: str):
+    conn: Connection = connect(path)
     return conn, conn.cursor()
 
-def init_tables():
-    init_conn, init_cursor = sqlite_connection()
+def init_tables(path: str):
+    init_conn, init_cursor = sqlite_connection(path)
     Location.sqlite_create_table(init_cursor)
     Employee.sqlite_create_table(init_cursor)
     Session.sqlite_create_table(init_cursor)
