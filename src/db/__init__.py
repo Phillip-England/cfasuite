@@ -13,11 +13,10 @@ if SQLITE_ABSOLUTE_PATH == None:
 
 def sqlite_connection():
     conn: Connection = connect(SQLITE_ABSOLUTE_PATH)
-    return conn
+    return conn, conn.cursor()
 
 def init_tables():
-    init_conn = sqlite_connection()
-    init_cursor = init_conn.cursor()
+    init_conn, init_cursor = sqlite_connection()
     Location.sqlite_create_table(init_cursor)
     Employee.sqlite_create_table(init_cursor)
     Session.sqlite_create_table(init_cursor)
