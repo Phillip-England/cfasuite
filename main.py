@@ -1,16 +1,14 @@
+import os
+import json
+from io import BytesIO
+from typing import Annotated, Optional
 
-from fastapi import FastAPI, Depends
-from fastapi.responses import JSONResponse, Response
-from fastapi import Form, UploadFile, File
+from fastapi import FastAPI, Depends, Form, UploadFile, File, Request
+from fastapi.responses import JSONResponse, Response, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from typing import Annotated, Optional
-import json
-from fastapi import Request, Depends
-from fastapi.responses import RedirectResponse
 from dotenv import load_dotenv
 from pandas import read_excel
-load_dotenv()
 
 from src.db import *
 from src.parse import *
@@ -18,28 +16,22 @@ from src.log import *
 from src.middleware import *
 from src.server import *
 
-
-# TODO
-
+load_dotenv()
 
 ADMIN_USER_ID = os.getenv('ADMIN_USER_ID')
 SQLITE_ABSOLUTE_PATH = os.getenv('SQLITE_ABSOLUTE_PATH')
 ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
 
-
 if ADMIN_USER_ID == None or SQLITE_ABSOLUTE_PATH == None or ADMIN_USERNAME == None or ADMIN_PASSWORD == None:
     print('please configure your .env file before serving cfasuite')
     print('checkout https://github.com/phillip-england/cfasuite for more information')
 
-
 init_tables(SQLITE_ABSOLUTE_PATH)
-
 
 app = FastAPI(dependencies=[Depends(depend_context)])
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
-
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
@@ -47,7 +39,6 @@ async def global_exception_handler(request: Request, exc: Exception):
         status_code=500,
         content={"message": f"Oops! Something went wrong: {exc}"}
     )
-
 
 @app.get('/')
 async def get_index(
@@ -59,9 +50,10 @@ async def get_index(
     session = Session.sqlite_get_by_id(c, session_id)
     if session != None:
         if int(session.user_id) == int(ADMIN_USER_ID):
+            conn.close()
             return RedirectResponse('/admin', status_code=303)
+    conn.close()
     return context['templates'].TemplateResponse(request, 'page/guest/home.html', {})
-
 
 @app.post('/form/login')
 async def post_form_login(
@@ -70,7 +62,7 @@ async def post_form_login(
     password: str | None = Form(None),
 ):
     conn, c = sqlite_connection(SQLITE_ABSOLUTE_PATH)
-    if username != ADMIN_USERNAME and password != ADMIN_PASSWORD:
+    if username != ADMIN_USERNAME or password != ADMIN_PASSWORD:
         conn.close()
         return RedirectResponse(url='/', status_code=303)
     pre_existing_session = Session.sqlite_get_by_user_id(c, ADMIN_USER_ID)
@@ -82,7 +74,6 @@ async def post_form_login(
     response = RedirectResponse(url='/admin', status_code=303)
     response.set_cookie('APP_SESSION_ID', session.id, httponly=True, secure=True, samesite='lax', max_age=1800)
     return response
-
 
 @app.get('/admin')
 async def get_admin(
@@ -97,7 +88,6 @@ async def get_admin(
     return context['templates'].TemplateResponse(request, "page/admin/home.html", {
         'session_key': session.key,
     })
-
 
 @app.get('/admin/cfa_locations')
 async def get_admin_locations(
@@ -118,7 +108,6 @@ async def get_admin_locations(
         }
     )
 
-
 @app.get('/admin/cfa_location/{location_id}')
 async def get_app_cfa_location(
     request: Request, 
@@ -136,13 +125,12 @@ async def get_app_cfa_location(
     cfa_location = Location.sqlite_find_by_id(c, location_id)
     employees = Employee.sqlite_find_all_by_cfa_location_id(c, cfa_location.id)
     conn.close()
-    return context['templates'].TemplateResponse(request, 'page/admin/location.html', context={''
+    return context['templates'].TemplateResponse(request, 'page/admin/location.html', context={
         'cfa_location': cfa_location, 
         'employees': employees,
         'session_key': session.key,
         'time_punch_data': time_punch_data,
     })
-
 
 @app.post('/form/upload/employee_bio')
 async def post_form_employee_bio(
@@ -177,7 +165,6 @@ async def post_form_employee_bio(
     conn.close()
     return RedirectResponse(url=f"/admin/cfa_location/{cfa_location_id}", status_code=303)
 
-
 @app.post('/form/cfa_location/create')
 async def post_form_cfa_location_create(
     request: Request,
@@ -196,7 +183,6 @@ async def post_form_cfa_location_create(
     conn.commit()
     conn.close()
     return RedirectResponse(url="/admin/cfa_locations", status_code=303)
-
 
 @app.post('/form/cfa_location/delete/{id}')
 async def post_form_cfa_location_delete(
@@ -219,7 +205,6 @@ async def post_form_cfa_location_delete(
     conn.close()
     return RedirectResponse('/admin/cfa_locations', 303)
 
-
 @app.post('/form/employee/update/department')
 async def post_form_employee_update_department(
     request: Request,
@@ -236,7 +221,6 @@ async def post_form_employee_update_department(
     conn.commit()
     conn.close()
     return RedirectResponse(f'/admin/cfa_location/{location_id}', 303)
-
 
 @app.post('/form/upload/time_punch')
 async def post_form_upload_time_punch(
@@ -256,8 +240,7 @@ async def post_form_upload_time_punch(
         conn.close()
         return RedirectResponse(url=f"/admin/cfa_location/{cfa_location_id}?time_punch_json={time_punch_pdf.to_json()}", status_code=303)
     except Exception as e:
-        return {"message": str(e)}
-    
+        return {"message": str(e)}    
 
 @app.get('/form/logout')
 async def post_form_logout(
@@ -278,5 +261,4 @@ async def post_form_logout(
     response = RedirectResponse(url='/', status_code=303)
     response.delete_cookie('APP_SESSION_ID', httponly=True, secure=True, samesite='lax')
     return response
-
 
