@@ -12,21 +12,28 @@ cd cfasuite
 2. Create a `.env`:
 ```bash
 touch .env
-cat <<EOF > ./cfasuite.env
-SQLITE_ABSOLUTE_PATH=/path/to/you/sqlite.db
-ADMIN_USER_ID=99999999
-ADMIN_PASSWORD=somepassword
-ADMIN_USERNAME=someusername
-EOF
 ```
 
-3. Install deps:
+3. Provide .env variables in `./env`:
 ```bash
-uv pip install -r requirements.txt ## or 'make install'
+SQLITE_ABSOLUTE_PATH= ## where you want your sqlite.db to exist
+ADMIN_USER_ID=99999999 ## a random number (preferable 1000000+)
+ADMIN_USERNAME=someusername ## a username for the admin user
+ADMIN_PASSWORD=somepassword ## a password for the admin user
+```
+
+4. Init a virtual env
+```bash
+uv venv
+```
+
+5. Install deps:
+```bash
+uv pip install -r requirements.txt
 ```
 
 ## Running
 
 ```bash
-uv run uvicorn main:app --reload ## or 'make run'
+uv run uvicorn main:app --reload
 ```
