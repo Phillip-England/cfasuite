@@ -4,7 +4,7 @@ from src.db import *
 
 
 def middleware_auth(c: Cursor, request: Request, user_id: str):
-    session_id = request.cookies.get('APP_SESSION_ID')
+    session_id = request.cookies.get("APP_SESSION_ID")
     if session_id == None:
         return None
     session = Session.sqlite_get_by_id(c, session_id)

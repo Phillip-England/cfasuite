@@ -89,6 +89,14 @@
         </table>
     {% endif %}
 
+    <form action="/form/upload/employee_birthday_report " method="POST" enctype="multipart/form-data">
+        <h2>Upload Employee Birthday Report</h2>
+        <input type="file" name="file"/>
+        <input type="hidden" value="{{ cfa_location.id }}" name="cfa_location_id" />
+        <input type="hidden" value="{{ session_key }}" name="session_key" />
+        <input type="submit"/>
+    </form>
+
     <form action="/form/upload/employee_bio" method="POST" enctype="multipart/form-data">
         <h2>Upload Employee Bio</h2>
         <input type="file" name="file"/>
@@ -157,21 +165,5 @@
         </tbody>
 
     </table>
-
-    <script>
-        let rows = document.querySelectorAll('.employee-row')
-        for (let i = 0; i < rows.length; i++) {
-            let row = rows[i]
-            let form = row.querySelector('form')
-            let submitProxy = row.querySelector('.submit-proxy')
-            let realSubmit = row.querySelector('.real-submit')
-            form.addEventListener('change', () => {
-                submitProxy.removeAttribute('disabled')
-            })
-            submitProxy.addEventListener('click', () => {
-                realSubmit.click()
-            })
-        }
-    </script>
 
 {% endblock %}
