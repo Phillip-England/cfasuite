@@ -2,7 +2,7 @@ from sqlite3 import Cursor
 
 
 class Employee:
-    def __init__(self, id, cfa_location_id, time_punch_name, department, birthday = ''):
+    def __init__(self, id, cfa_location_id, time_punch_name, department, birthday=""):
         self.id = id
         self.cfa_location_id = cfa_location_id
         self.time_punch_name = time_punch_name
@@ -31,7 +31,11 @@ class Employee:
 
     @staticmethod
     def sqlite_insert_one(
-        c: Cursor, time_punch_name: str, department: str, cfa_location_id: str, birthday = ''
+        c: Cursor,
+        time_punch_name: str,
+        department: str,
+        cfa_location_id: str,
+        birthday="",
     ):
         sql = f"""INSERT INTO employees (time_punch_name, department, cfa_location_id, birthday) VALUES (?, ?, ?, ?)"""
         params = (
@@ -74,7 +78,9 @@ class Employee:
         out = []
         for row in rows:
             (id, cfa_location_id, time_punch_name, department, birthday) = row
-            out.append(Employee(id, cfa_location_id, time_punch_name, department))
+            out.append(
+                Employee(id, cfa_location_id, time_punch_name, department, birthday)
+            )
         return out
 
     @staticmethod

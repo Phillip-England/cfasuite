@@ -1,8 +1,8 @@
 from io import BytesIO
+from sqlite3 import Connection, Cursor
 
-from pandas import read_excel
-from sqlite3 import Cursor, Connection
 from fastapi import UploadFile
+from pandas import read_excel
 
 from src.db import Employee
 
@@ -10,7 +10,7 @@ from src.db import Employee
 class EmployeeBioReader:
     def __init__(self, names: slice):
         self.names = names
-        
+
     @staticmethod
     async def new(file: UploadFile):
         names = []
@@ -25,7 +25,9 @@ class EmployeeBioReader:
         return EmployeeBioReader(names)
 
     def insert_all_employees(self, conn: Connection, c: Cursor, cfa_location_id: str):
-        current_employees = Employee.sqlite_find_all_by_cfa_location_id(c, cfa_location_id)
+        current_employees = Employee.sqlite_find_all_by_cfa_location_id(
+            c, cfa_location_id
+        )
         reader_names = self.names
         for name in reader_names:
             found = False
@@ -35,9 +37,14 @@ class EmployeeBioReader:
                     break
             if found == False:
                 Employee.sqlite_insert_one(c, name, "INIT", cfa_location_id)
-        conn.commit() 
-    def remove_terminated_employees(self, conn: Connection, c: Cursor, cfa_location_id: str):
-        current_employees = Employee.sqlite_find_all_by_cfa_location_id(c, cfa_location_id)
+        conn.commit()
+
+    def remove_terminated_employees(
+        self, conn: Connection, c: Cursor, cfa_location_id: str
+    ):
+        current_employees = Employee.sqlite_find_all_by_cfa_location_id(
+            c, cfa_location_id
+        )
         for employee in current_employees:
             found = False
             for name in self.names:
@@ -47,7 +54,3 @@ class EmployeeBioReader:
             if found == False:
                 Employee.sqlite_delete_by_id(c, employee.id)
         conn.commit()
-     
-
-
-

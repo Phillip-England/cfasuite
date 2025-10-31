@@ -7,3 +7,6 @@ install:
 
 format:
 	uv run black .; uv run isort .;
+
+bday:
+	uv run python ./birthday_bot.py

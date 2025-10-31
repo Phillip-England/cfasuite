@@ -1,6 +1,5 @@
 import json
 import os
-from io import BytesIO
 from typing import Annotated, Optional
 
 from dotenv import load_dotenv
@@ -8,7 +7,6 @@ from fastapi import Depends, FastAPI, File, Form, Request, UploadFile
 from fastapi.responses import JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pandas import read_excel
 
 from src.db import *
 from src.log import *
@@ -171,6 +169,7 @@ async def post_form_employee_bio(
     return RedirectResponse(
         url=f"/admin/cfa_location/{cfa_location_id}", status_code=303
     )
+
 
 @app.post("/form/upload/employee_bio")
 async def post_form_employee_bio(
