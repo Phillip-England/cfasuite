@@ -10,6 +10,7 @@ from src.db import Employee
 class EmployeeBioReader:
     def __init__(self, names: slice):
         self.names = names
+        
     @staticmethod
     async def new(file: UploadFile):
         names = []

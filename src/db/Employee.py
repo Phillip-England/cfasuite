@@ -2,11 +2,19 @@ from sqlite3 import Cursor
 
 
 class Employee:
-    def __init__(self, id, cfa_location_id, time_punch_name, department):
+    def __init__(self, id, cfa_location_id, time_punch_name, department, birthday = ''):
         self.id = id
         self.cfa_location_id = cfa_location_id
         self.time_punch_name = time_punch_name
         self.department = department
+        self.birthday = birthday
+
+    @staticmethod
+    def sqlite_add_birthday(c: Cursor, id: str, birthday: str):
+        sql = "UPDATE employees SET birthday = ? WHERE id = ?"
+        params = (birthday, id)
+        c.execute(sql, params)
+        return c.rowcount
 
     @staticmethod
     def sqlite_create_table(c: Cursor):
@@ -15,20 +23,22 @@ class Employee:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 cfa_location_id INTEGER NOT NULL,
                 time_punch_name TEXT NOT NULL,
-                department TEXT NOT NULL
+                department TEXT NOT NULL,
+                birthday TEXT
             )
         """
         c.execute(sql)
 
     @staticmethod
     def sqlite_insert_one(
-        c: Cursor, time_punch_name: str, department: str, cfa_location_id: str
+        c: Cursor, time_punch_name: str, department: str, cfa_location_id: str, birthday = ''
     ):
-        sql = f"""INSERT INTO employees (time_punch_name, department, cfa_location_id) VALUES (?, ?, ?)"""
+        sql = f"""INSERT INTO employees (time_punch_name, department, cfa_location_id, birthday) VALUES (?, ?, ?, ?)"""
         params = (
             time_punch_name,
             department,
             cfa_location_id,
+            birthday,
         )
         c.execute(sql, params)
         return Employee(c.lastrowid, cfa_location_id, time_punch_name, department)
@@ -63,7 +73,7 @@ class Employee:
         rows = c.fetchall()
         out = []
         for row in rows:
-            (id, cfa_location_id, time_punch_name, department) = row
+            (id, cfa_location_id, time_punch_name, department, birthday) = row
             out.append(Employee(id, cfa_location_id, time_punch_name, department))
         return out
 

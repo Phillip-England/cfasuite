@@ -108,6 +108,7 @@
     <table>
         <thead>
             <th>Name</th>
+            <th>Birthday</th>
             <th>Department</th>
             <th>Submit</th>
         </thead>
@@ -119,6 +120,10 @@
                     {% if employee.department == 'INIT' %}
                         <span>*</span>
                     {% endif %}    
+                </td>
+                <td>
+                    <p>{{ employee.birthday }}</p>
+                </td>
                 <td>
                     <form method="post" action="/form/employee/update/department">
                         <select name="department">
