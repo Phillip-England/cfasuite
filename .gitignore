@@ -1,4 +1,5 @@
 *.do
+*.xlsx
 
 # dependencies (bun install)
 node_modules
