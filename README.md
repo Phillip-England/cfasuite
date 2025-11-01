@@ -17,7 +17,7 @@ touch .env
 3. Provide .env variables in `./env`:
 ```bash
 SQLITE_ABSOLUTE_PATH= ## where you want your sqlite.db to exist
-ADMIN_USER_ID=99999999 ## a random number (preferable 1000000+)
+ADMIN_ID=99999999 ## a random number (preferable 1000000+)
 ADMIN_USERNAME=someusername ## a username for the admin user
 ADMIN_PASSWORD=somepassword ## a password for the admin user
 ```
