@@ -35,6 +35,8 @@ try:
     post_form_upload_employee_bio(app, config)
     post_form_upload_employee_birthday_report(app, config)
     post_form_upload_time_punch(app, config)
+    get_form_logout(app, config)
+    post_form_upload_hotschedules_staff_html(app, config)
 
 
 except Exception as e:

@@ -21,6 +21,14 @@
         <input type="submit"/>
     </form>
 
+    <form action="/form/upload/hotschedules_staff_html" method="POST">
+        <h2>Upload HotSchedules Staffing</h2>
+        <input type="textarea" name="html"/>
+        <input type="hidden" value="{{ cfa_location.id }}" name="cfa_location_id" />
+        <input type="hidden" value="{{ session_key }}" name="session_key" />
+        <input type="submit"/>
+    </form>
+
     {% if time_punch_data %}
         <h3>Total Breakdown</h3>
         <table>

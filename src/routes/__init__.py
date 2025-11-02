@@ -12,3 +12,4 @@ from .post_form_cfa_location_delete import *
 from .post_form_upload_time_punch import *
 from .post_form_upload_employee_bio import *
 from .post_form_employee_update_department import *
+from .post_form_upload_hotschedules_staff_html import *
