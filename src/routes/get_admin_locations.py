@@ -1,12 +1,12 @@
+from typing import Optional
+
 from fastapi import Depends, FastAPI, Request
 from fastapi.responses import RedirectResponse
 
-from typing import Optional
-
-from ..middleware import sqlite_connection, middleware_auth
-from ..context import depend_context
 from ..config import AppConfig
+from ..context import depend_context
 from ..db import Location
+from ..middleware import middleware_auth, sqlite_connection
 
 
 def get_admin_locations(app: FastAPI, config: AppConfig):

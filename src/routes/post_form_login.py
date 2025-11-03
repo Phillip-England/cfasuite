@@ -1,9 +1,10 @@
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import RedirectResponse, Response
 
-from ..middleware import sqlite_connection
 from ..config import AppConfig
 from ..db import Session
+from ..middleware import sqlite_connection
+
 
 def post_form_login(app: FastAPI, config: AppConfig):
     @app.post("/form/login")

@@ -1,9 +1,9 @@
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import RedirectResponse
 
-from ..middleware import sqlite_connection, middleware_auth
 from ..config import AppConfig
 from ..db import Location
+from ..middleware import middleware_auth, sqlite_connection
 
 
 def post_form_cfa_location_create(app: FastAPI, config: AppConfig):

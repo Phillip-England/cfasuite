@@ -1,17 +1,19 @@
-from fastapi import FastAPI, Form, File, UploadFile, Request
-from fastapi.responses import RedirectResponse
-
 from typing import Annotated
 
-from ..middleware import sqlite_connection, middleware_auth
+from fastapi import FastAPI, File, Form, Request, UploadFile
+from fastapi.responses import RedirectResponse
+
 from ..config import AppConfig
+from ..middleware import middleware_auth, sqlite_connection
 from ..parse import EmployeeBioReader
+
 
 def post_form_upload_employee_bio(app: FastAPI, config: AppConfig):
     @app.post("/form/upload/employee_bio")
     async def post_form_upload_employee_bio(
         request: Request,
-        file: Annotated[UploadFile, File()], cfa_location_id: str | None = Form(None)
+        file: Annotated[UploadFile, File()],
+        cfa_location_id: str | None = Form(None),
     ):
         conn, c = sqlite_connection(config.sqlite_absolute_path)
         session = middleware_auth(c, request, config.admin_id)

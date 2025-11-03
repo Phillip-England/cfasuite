@@ -3,10 +3,11 @@ from fastapi.responses import RedirectResponse
 
 from src import *
 
-from ..middleware import sqlite_connection
-from ..context import depend_context
 from ..config import AppConfig
+from ..context import depend_context
 from ..db import Session
+from ..middleware import sqlite_connection
+
 
 def get_index(app: FastAPI, config: AppConfig):
     @app.get("/")

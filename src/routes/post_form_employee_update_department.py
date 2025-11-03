@@ -1,12 +1,13 @@
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import RedirectResponse
 
-from ..middleware import sqlite_connection, middleware_auth
 from ..config import AppConfig
 from ..db import Employee
+from ..middleware import middleware_auth, sqlite_connection
+
 
 def post_form_employee_update_department(app: FastAPI, config: AppConfig):
-    @app.post('/form/employee/update/department')
+    @app.post("/form/employee/update/department")
     async def post_form_employee_update_department(
         request: Request,
         department: str | None = Form(None),
@@ -22,4 +23,3 @@ def post_form_employee_update_department(app: FastAPI, config: AppConfig):
         conn.commit()
         conn.close()
         return RedirectResponse(f"/admin/cfa_location/{location_id}", 303)
-

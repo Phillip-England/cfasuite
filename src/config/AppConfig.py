@@ -24,6 +24,13 @@ class AppConfig:
         sqlite_absolute_path = os.getenv("SQLITE_ABSOLUTE_PATH")
         admin_username = os.getenv("ADMIN_USERNAME")
         admin_password = os.getenv("ADMIN_PASSWORD")
-        if admin_id == None or sqlite_absolute_path == None or admin_username == None or admin_password == None:
-            raise Exception('please configure your .env file before serving cfasuite\ncheckout https://github.com/phillip-england/cfasuite for more information')
+        if (
+            admin_id == None
+            or sqlite_absolute_path == None
+            or admin_username == None
+            or admin_password == None
+        ):
+            raise Exception(
+                "please configure your .env file before serving cfasuite\ncheckout https://github.com/phillip-england/cfasuite for more information"
+            )
         return AppConfig(admin_id, sqlite_absolute_path, admin_username, admin_password)

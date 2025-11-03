@@ -15,7 +15,6 @@ try:
     app.mount("/static", StaticFiles(directory="static"), name="static")
     templates = Jinja2Templates(directory="templates")
 
-
     @app.exception_handler(Exception)
     async def global_exception_handler(request: Request, exc: Exception):
         return JSONResponse(
@@ -42,8 +41,3 @@ try:
 except Exception as e:
     print(e)
     sys.exit(1)
-
-
-
-
-

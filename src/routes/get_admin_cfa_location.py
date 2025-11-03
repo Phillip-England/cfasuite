@@ -1,14 +1,14 @@
 import json
+from typing import Optional
 
 from fastapi import Depends, FastAPI, Request
 from fastapi.responses import RedirectResponse
 
-from typing import Optional
-
-from ..middleware import sqlite_connection, middleware_auth
-from ..context import depend_context
 from ..config import AppConfig
-from ..db import Location, Employee
+from ..context import depend_context
+from ..db import Employee, Location
+from ..middleware import middleware_auth, sqlite_connection
+
 
 def get_admin_cfa_location(app: FastAPI, config: AppConfig):
     @app.get("/admin/cfa_location/{location_id}")

@@ -4,7 +4,7 @@ from sqlite3 import Connection, Cursor
 from fastapi import UploadFile
 from pandas import read_excel
 
-from src.db import Employee
+from src.db import Employee, EmployeeDepartment
 
 
 class EmployeeBioReader:
@@ -36,7 +36,7 @@ class EmployeeBioReader:
                     found = True
                     break
             if found == False:
-                Employee.sqlite_insert_one(c, name, "INIT", cfa_location_id)
+                Employee.sqlite_insert_one(c, name, EmployeeDepartment.init().department, cfa_location_id)
         conn.commit()
 
     def remove_terminated_employees(

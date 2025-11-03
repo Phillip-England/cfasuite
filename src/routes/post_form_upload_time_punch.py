@@ -1,15 +1,16 @@
-from fastapi import FastAPI, Form, Request, UploadFile, File
-from fastapi.responses import RedirectResponse
-
 from typing import Annotated
 
-from ..middleware import sqlite_connection, middleware_auth
+from fastapi import FastAPI, File, Form, Request, UploadFile
+from fastapi.responses import RedirectResponse
+
 from ..config import AppConfig
 from ..db import Employee
+from ..middleware import middleware_auth, sqlite_connection
 from ..parse import TimePunchReader
 
+
 def post_form_upload_time_punch(app: FastAPI, config: AppConfig):
-    @app.post('/form/upload/time_punch')
+    @app.post("/form/upload/time_punch")
     async def post_form_upload_time_punch(
         request: Request,
         file: Annotated[UploadFile, File()],

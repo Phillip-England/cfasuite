@@ -1,14 +1,15 @@
+from typing import Optional
+
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse, Response
 
-from typing import Optional
-
-from ..middleware import sqlite_connection
 from ..config import AppConfig
 from ..db import Session
+from ..middleware import sqlite_connection
+
 
 def get_form_logout(app: FastAPI, config: AppConfig):
-    @app.get('/form/logout')
+    @app.get("/form/logout")
     async def get_form_logout(response: Response, session_key: Optional[str] = None):
         conn, c = sqlite_connection(config.sqlite_absolute_path)
         if session_key == None:
@@ -22,5 +23,7 @@ def get_form_logout(app: FastAPI, config: AppConfig):
         conn.commit()
         conn.close()
         response = RedirectResponse(url="/", status_code=303)
-        response.delete_cookie("APP_SESSION_ID", httponly=True, secure=True, samesite="lax")
+        response.delete_cookie(
+            "APP_SESSION_ID", httponly=True, secure=True, samesite="lax"
+        )
         return response

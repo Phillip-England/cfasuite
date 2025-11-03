@@ -1,8 +1,33 @@
 from sqlite3 import Cursor
 
 
+class EmployeeDepartment:
+    def __init__(self, department: str):
+        self.department = department
+        return
+    @staticmethod
+    def init():
+        return EmployeeDepartment("INIT")
+    def foh():
+        return EmployeeDepartment("FOH")
+    def boh():
+        return EmployeeDepartment("BOH")
+    def training():
+        return EmployeeDepartment("TRAINING")
+    def rlt():
+        return EmployeeDepartment("RLT")
+    def cst():
+        return EmployeeDepartment("CST")
+    def executive():
+        return EmployeeDepartment("EXECUTIVE")
+    def none():
+        return EmployeeDepartment("NONE")
+
+
 class Employee:
-    def __init__(self, id, cfa_location_id, time_punch_name, name, department, birthday=""):
+    def __init__(
+        self, id, cfa_location_id, time_punch_name, name, department, birthday=""
+    ):
         self.id = id
         self.cfa_location_id = cfa_location_id
         self.time_punch_name = time_punch_name
@@ -39,16 +64,18 @@ class Employee:
         cfa_location_id: str,
         birthday="",
     ):
-        name_parts = time_punch_name.split(',')
-        last_name = name_parts[0].removesuffix(' ')
+        name_parts = time_punch_name.split(",")
+        last_name = name_parts[0].removesuffix(" ")
         first_name = name_parts[1]
-        first_name = first_name.removeprefix(' ')
-        first_name_finalized = ''
-        if first_name.count(' ') > 0:
-            first_name_finalized += first_name.split(' ')[0].removesuffix(' ').removeprefix(' ')
+        first_name = first_name.removeprefix(" ")
+        first_name_finalized = ""
+        if first_name.count(" ") > 0:
+            first_name_finalized += (
+                first_name.split(" ")[0].removesuffix(" ").removeprefix(" ")
+            )
         else:
-            first_name_finalized += first_name.removesuffix(' ').removeprefix(' ')
-        name = f'{first_name_finalized} {last_name}' 
+            first_name_finalized += first_name.removesuffix(" ").removeprefix(" ")
+        name = f"{first_name_finalized} {last_name}"
         sql = f"""INSERT INTO employees (name, time_punch_name, department, cfa_location_id, birthday) VALUES (?, ?, ?, ?, ?)"""
         params = (
             name,
@@ -92,7 +119,9 @@ class Employee:
         for row in rows:
             (id, cfa_location_id, time_punch_name, name, department, birthday) = row
             out.append(
-                Employee(id, cfa_location_id, time_punch_name, name, department, birthday)
+                Employee(
+                    id, cfa_location_id, time_punch_name, name, department, birthday
+                )
             )
         return out
 
