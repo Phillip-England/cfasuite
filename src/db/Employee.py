@@ -2,10 +2,11 @@ from sqlite3 import Cursor
 
 
 class Employee:
-    def __init__(self, id, cfa_location_id, time_punch_name, department, birthday=""):
+    def __init__(self, id, cfa_location_id, time_punch_name, name, department, birthday=""):
         self.id = id
         self.cfa_location_id = cfa_location_id
         self.time_punch_name = time_punch_name
+        self.name = name
         self.department = department
         self.birthday = birthday
 
@@ -23,6 +24,7 @@ class Employee:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 cfa_location_id INTEGER NOT NULL,
                 time_punch_name TEXT NOT NULL,
+                name TEXT NOT NULL,
                 department TEXT NOT NULL,
                 birthday TEXT
             )
@@ -37,15 +39,26 @@ class Employee:
         cfa_location_id: str,
         birthday="",
     ):
-        sql = f"""INSERT INTO employees (time_punch_name, department, cfa_location_id, birthday) VALUES (?, ?, ?, ?)"""
+        name_parts = time_punch_name.split(',')
+        last_name = name_parts[0].removesuffix(' ')
+        first_name = name_parts[1]
+        first_name = first_name.removeprefix(' ')
+        first_name_finalized = ''
+        if first_name.count(' ') > 0:
+            first_name_finalized += first_name.split(' ')[0].removesuffix(' ').removeprefix(' ')
+        else:
+            first_name_finalized += first_name.removesuffix(' ').removeprefix(' ')
+        name = f'{first_name_finalized} {last_name}' 
+        sql = f"""INSERT INTO employees (name, time_punch_name, department, cfa_location_id, birthday) VALUES (?, ?, ?, ?, ?)"""
         params = (
+            name,
             time_punch_name,
             department,
             cfa_location_id,
             birthday,
         )
         c.execute(sql, params)
-        return Employee(c.lastrowid, cfa_location_id, time_punch_name, department)
+        return Employee(c.lastrowid, cfa_location_id, time_punch_name, name, department)
 
     @staticmethod
     def sqlite_find_by_time_punch_name(c: Cursor, time_punch_name: str):
@@ -55,8 +68,8 @@ class Employee:
         row = c.fetchone()
         if row == None:
             return None
-        (id, cfa_location_id, time_punch_name, department) = row
-        return Employee(id, cfa_location_id, time_punch_name, department)
+        (id, cfa_location_id, time_punch_name, name, department) = row
+        return Employee(id, cfa_location_id, time_punch_name, name, department)
 
     @staticmethod
     def sqlite_find_by_id(c: Cursor, id: str):
@@ -66,8 +79,8 @@ class Employee:
         row = c.fetchone()
         if row == None:
             return None
-        (id, cfa_location_id, time_punch_name, department) = row
-        return Employee(id, cfa_location_id, time_punch_name, department)
+        (id, cfa_location_id, time_punch_name, name, department) = row
+        return Employee(id, cfa_location_id, time_punch_name, name, department)
 
     @staticmethod
     def sqlite_find_all_by_cfa_location_id(c: Cursor, cfa_location_id: str):
@@ -77,9 +90,9 @@ class Employee:
         rows = c.fetchall()
         out = []
         for row in rows:
-            (id, cfa_location_id, time_punch_name, department, birthday) = row
+            (id, cfa_location_id, time_punch_name, name, department, birthday) = row
             out.append(
-                Employee(id, cfa_location_id, time_punch_name, department, birthday)
+                Employee(id, cfa_location_id, time_punch_name, name, department, birthday)
             )
         return out
 

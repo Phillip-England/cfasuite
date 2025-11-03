@@ -9,7 +9,7 @@ from ..db import Employee
 from ..parse import TimePunchReader
 
 def post_form_upload_time_punch(app: FastAPI, config: AppConfig):
-    @app.post('/post/form/upload/time_punch')
+    @app.post('/form/upload/time_punch')
     async def post_form_upload_time_punch(
         request: Request,
         file: Annotated[UploadFile, File()],

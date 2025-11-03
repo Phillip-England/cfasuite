@@ -20,6 +20,7 @@ def post_form_cfa_location_delete(app: FastAPI, config: AppConfig):
         cfa_location = Location.sqlite_find_by_id(c, id)
         if cfa_location == None:
             return JSONResponse({"message": "unauthorized"}, 401)
+        print(cfa_location.number)
         if cfa_location.number != cfa_location_number:
             return JSONResponse({"message": "unauthorized"}, 401)
         Location.sqlite_delete_by_id(c, id)

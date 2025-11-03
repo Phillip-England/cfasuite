@@ -22,7 +22,7 @@ def post_form_upload_hotschedules_staff_html(app: FastAPI, config: AppConfig):
             return RedirectResponse("/", 303)
         employees = Employee.sqlite_find_all_by_cfa_location_id(c, cfa_location_id)
         
-        reader = await HotSchedulesStaffReader.new(html)
+        reader = await HotSchedulesStaffReader.new(html, employees)
         return RedirectResponse(
             url=f"/admin/cfa_location/{cfa_location_id}", status_code=303
         )

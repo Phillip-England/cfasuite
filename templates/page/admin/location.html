@@ -116,6 +116,7 @@
     <table>
         <thead>
             <th>Name</th>
+            <th>Time Punch Name</th>
             <th>Birthday</th>
             <th>Department</th>
             <th>Submit</th>
@@ -123,6 +124,9 @@
         <tbody>
             {% for employee in employees %}
             <tr class="employee-row">
+                <td>
+                    {{ employee.name }}
+                </td>
                 <td>
                     {{ employee.time_punch_name }}
                     {% if employee.department == 'INIT' %}
