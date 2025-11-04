@@ -1,27 +1,17 @@
 from sqlite3 import Cursor
+from enum import StrEnum
 
 
-class EmployeeDepartment:
-    def __init__(self, department: str):
-        self.department = department
-        return
-    @staticmethod
-    def init():
-        return EmployeeDepartment("INIT")
-    def foh():
-        return EmployeeDepartment("FOH")
-    def boh():
-        return EmployeeDepartment("BOH")
-    def training():
-        return EmployeeDepartment("TRAINING")
-    def rlt():
-        return EmployeeDepartment("RLT")
-    def cst():
-        return EmployeeDepartment("CST")
-    def executive():
-        return EmployeeDepartment("EXECUTIVE")
-    def none():
-        return EmployeeDepartment("NONE")
+class EmployeeDepartment(StrEnum):
+    INIT = 'INIT'
+    FOH = 'FOH'
+    BOH = 'BOH'
+    TRAINING= 'TRAINING'
+    RLT = 'RLT'
+    CST = 'CST'
+    EXECUTIVE = 'EXECUTIVE'
+    PARTNER = 'PARTNER'
+    NONE = 'NONE'
 
 
 class Employee:

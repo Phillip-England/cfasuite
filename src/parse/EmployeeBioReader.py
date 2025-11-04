@@ -36,7 +36,7 @@ class EmployeeBioReader:
                     found = True
                     break
             if found == False:
-                Employee.sqlite_insert_one(c, name, EmployeeDepartment.init().department, cfa_location_id)
+                Employee.sqlite_insert_one(c, name, EmployeeDepartment.INIT, cfa_location_id)
         conn.commit()
 
     def remove_terminated_employees(
