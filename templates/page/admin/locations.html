@@ -1,31 +1,70 @@
 {% extends "layout/admin.html" %}
 {% block title %}Locations{% endblock %}
 {% block content %}
-    <h1>Locations - CFA Suite</h1>
-    <form method="post" action="/form/cfa_location/create">
-        <h2>Create Locations</h2>
-        <p>{{ err_create_location }}</p>
-        <div>
-            <label>name</label>
-            <input type="text" name="name" />
+    
+    <div class="max-w-3xl mx-auto space-y-8">
+        
+        <div class="flex items-center justify-between">
+            <h1 class="text-3xl font-bold leading-tight text-slate-900">Locations</h1>
         </div>
-        <div>
-            <label>number</label>
-            <input type="text" name="number" />
-        </div>
-        <input type="hidden" value="{{ session_key }}" name="session_key" />
-        <input type="submit"/>
-    </form>
 
-    <ul>
-        {% for cfa_location in cfa_locations %}
-            <li>
-                <a href="/admin/cfa_location/{{ cfa_location.id }}">{{ cfa_location.name }} - {{ cfa_location.number }}</a>
-            </li>
+        <div class="bg-white shadow sm:rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-lg leading-6 font-medium text-slate-900">Add New Location</h3>
+                {% if err_create_location %}
+                    <div class="mt-2 rounded-md bg-red-50 p-4">
+                        <div class="flex">
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-red-800">Error</h3>
+                                <div class="mt-2 text-sm text-red-700">
+                                    <p>{{ err_create_location }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
                 
-        {% endfor %}
-    </ul>
+                <form method="post" action="/form/cfa_location/create" class="mt-5 sm:flex sm:items-end sm:gap-4">
+                    <div class="w-full sm:max-w-xs">
+                        <label class="block text-sm font-medium text-slate-700">Name</label>
+                        <input type="text" name="name" class="mt-1 shadow-sm focus:ring-slate-500 focus:border-slate-500 block w-full sm:text-sm border-slate-300 rounded-md" placeholder="e.g. Tulsa Hills">
+                    </div>
+                    <div class="w-full sm:max-w-xs mt-4 sm:mt-0">
+                        <label class="block text-sm font-medium text-slate-700">Number</label>
+                        <input type="text" name="number" class="mt-1 shadow-sm focus:ring-slate-500 focus:border-slate-500 block w-full sm:text-sm border-slate-300 rounded-md" placeholder="e.g. 02441">
+                    </div>
+                    <div class="mt-4 sm:mt-0">
+                        <input type="hidden" value="{{ session_key }}" name="session_key" />
+                        <button type="submit" class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-slate-900 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">
+                            Create
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-
+        <div class="bg-white shadow overflow-hidden sm:rounded-md">
+            <ul role="list" class="divide-y divide-slate-200">
+                {% for cfa_location in cfa_locations %}
+                <li>
+                    <a href="/admin/cfa_location/{{ cfa_location.id }}" class="block hover:bg-slate-50 transition duration-150 ease-in-out">
+                        <div class="px-4 py-4 sm:px-6">
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm font-medium text-slate-600 truncate">
+                                    {{ cfa_location.name }}
+                                </p>
+                                <div class="ml-2 flex-shrink-0 flex">
+                                    <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-slate-100 text-slate-800">
+                                        #{{ cfa_location.number }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
 
 {% endblock %}

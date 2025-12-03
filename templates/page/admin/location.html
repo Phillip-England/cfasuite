@@ -1,202 +1,230 @@
 {% extends "layout/admin.html" %}
 {% block title %}Locations{% endblock %}
 {% block content %}
-    <h1>({{ cfa_location.number }}) {{ cfa_location.name }} - CFA Suite</h1>
 
-    <form method="post" action="/form/cfa_location/delete/{{ cfa_location.id }}">
-        <h2>Delete CFA Location</h2>
-        <div>
-            <label>location number</label>
-            <input type="text" name="cfa_location_number" />
+<div class="space-y-8">
+    
+    <div class="border-b border-slate-200 pb-5 flex justify-between items-center">
+        <h1 class="text-3xl font-bold leading-6 text-slate-900">
+            <span class="text-slate-500 font-normal">#{{ cfa_location.number }}</span> {{ cfa_location.name }}
+        </h1>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        
+        <div class="bg-white overflow-hidden shadow rounded-lg border border-slate-100">
+            <div class="px-4 py-5 sm:p-6">
+                <h2 class="text-lg font-medium leading-6 text-slate-900 mb-4">Upload Time Punch</h2>
+                <form action="/form/upload/time_punch" method="POST" enctype="multipart/form-data" class="space-y-4">
+                    <input type="file" name="file" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100"/>
+                    <input type="hidden" value="{{ cfa_location.id }}" name="cfa_location_id" />
+                    <input type="hidden" value="{{ session_key }}" name="session_key" />
+                    <button type="submit" class="w-full bg-slate-800 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">Upload CSV</button>
+                </form>
+            </div>
         </div>
-        <input type="hidden" value="{{ session_key }}" name="session_key" />
-        <input type="submit">
-    </form>
 
-    <form action="/form/upload/time_punch" method="POST" enctype="multipart/form-data">
-        <h2>Upload Time Punch</h2>
-        <input type="file" name="file"/>
-        <input type="hidden" value="{{ cfa_location.id }}" name="cfa_location_id" />
-        <input type="hidden" value="{{ session_key }}" name="session_key" />
-        <input type="submit"/>
-    </form>
+        <div class="bg-white overflow-hidden shadow rounded-lg border border-slate-100">
+            <div class="px-4 py-5 sm:p-6">
+                <h2 class="text-lg font-medium leading-6 text-slate-900 mb-4">Upload HotSchedules</h2>
+                <form action="/form/upload/hotschedules_staff_html" method="POST" class="space-y-4">
+                    <textarea name="html" rows="3" class="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-slate-300 rounded-md" placeholder="Paste HTML here..."></textarea>
+                    <input type="hidden" value="{{ cfa_location.id }}" name="cfa_location_id" />
+                    <input type="hidden" value="{{ session_key }}" name="session_key" />
+                    <button type="submit" class="w-full bg-slate-800 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">Process HTML</button>
+                </form>
+            </div>
+        </div>
 
-    <form action="/form/upload/hotschedules_staff_html" method="POST">
-        <h2>Upload HotSchedules Staffing</h2>
-        <input type="textarea" name="html"/>
-        <input type="hidden" value="{{ cfa_location.id }}" name="cfa_location_id" />
-        <input type="hidden" value="{{ session_key }}" name="session_key" />
-        <input type="submit"/>
-    </form>
+        <div class="bg-white overflow-hidden shadow rounded-lg border border-slate-100">
+            <div class="px-4 py-5 sm:p-6 space-y-6">
+                <div>
+                    <h3 class="text-sm font-medium text-slate-900 mb-2">Birthday Report</h3>
+                    <form action="/form/upload/employee_birthday_report " method="POST" enctype="multipart/form-data" class="flex gap-2">
+                        <input type="file" name="file" class="block w-full text-xs text-slate-500"/>
+                        <input type="hidden" value="{{ cfa_location.id }}" name="cfa_location_id" />
+                        <input type="hidden" value="{{ session_key }}" name="session_key" />
+                        <button type="submit" class="bg-slate-100 text-slate-700 px-3 py-1 rounded text-xs hover:bg-slate-200">Go</button>
+                    </form>
+                </div>
+                <div class="border-t border-slate-100 pt-4">
+                    <h3 class="text-sm font-medium text-slate-900 mb-2">Employee Bio</h3>
+                    <form action="/form/upload/employee_bio" method="POST" enctype="multipart/form-data" class="flex gap-2">
+                        <input type="file" name="file" class="block w-full text-xs text-slate-500"/>
+                        <input type="hidden" value="{{ cfa_location.id }}" name="cfa_location_id" />
+                        <input type="hidden" value="{{ session_key }}" name="session_key" />
+                        <button type="submit" class="bg-slate-100 text-slate-700 px-3 py-1 rounded text-xs hover:bg-slate-200">Go</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     {% if time_punch_data %}
-        <h3>Total Breakdown</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Category</th>
-                    <th>Hours</th>
-                    <th>Wages</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Regular</td>
-                    <td>{{ time_punch_data['regular_hours'] }}</td>
-                    <td>{{ time_punch_data['regular_wages'] }}</td>
-                </tr>
-                <tr>
-                    <td>Overtime</td>
-                    <td>{{ time_punch_data['overtime_hours'] }}</td>
-                    <td>{{ time_punch_data['overtime_wages'] }}</td>
-                </tr>
-                <tr>
-                    <td>Total</td>
-                    <td>{{ time_punch_data['total_hours'] }}</td>
-                    <td>{{ time_punch_data['total_wages'] }}</td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div class="bg-white shadow overflow-hidden rounded-lg">
+            <div class="px-4 py-5 sm:px-6 bg-slate-50 border-b border-slate-200">
+                <h3 class="text-lg leading-6 font-medium text-slate-900">Total Breakdown</h3>
+            </div>
+            <table class="min-w-full divide-y divide-slate-200">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Category</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Hours</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Wages</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-slate-200">
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">Regular</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ time_punch_data['regular_hours'] }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ time_punch_data['regular_wages'] }}</td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">Overtime</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ time_punch_data['overtime_hours'] }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ time_punch_data['overtime_wages'] }}</td>
+                    </tr>
+                    <tr class="bg-slate-50 font-bold">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">Total</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{{ time_punch_data['total_hours'] }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">{{ time_punch_data['total_wages'] }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-        <h3>Department Breakdown</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Department</th>
-                    <th>Percentage</th>
-                    <th>Cost</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>FOH</td>
-                    <td>{{ time_punch_data['foh_percentage'] }}</td>
-                    <td>{{ time_punch_data['foh_cost'] }}</td>
-                </tr>
-                <tr>
-                    <td>BOH</td>
-                    <td>{{ time_punch_data['boh_percentage'] }}</td>
-                    <td>{{ time_punch_data['boh_cost'] }}</td>
-                </tr>
-                <tr>
-                    <td>RLT</td>
-                    <td>{{ time_punch_data['rlt_percentage'] }}</td>
-                    <td>{{ time_punch_data['rlt_cost'] }}</td>
-                </tr>
-                <tr>
-                    <td>CST</td>
-                    <td>{{ time_punch_data['cst_percentage'] }}</td>
-                    <td>{{ time_punch_data['cst_cost'] }}</td>
-                </tr>
-                <tr>
-                    <td>TERM</td>
-                    <td>{{ time_punch_data['term_percentage'] }}</td>
-                    <td>{{ time_punch_data['term_cost'] }}</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="bg-white shadow overflow-hidden rounded-lg">
+            <div class="px-4 py-5 sm:px-6 bg-slate-50 border-b border-slate-200">
+                <h3 class="text-lg leading-6 font-medium text-slate-900">Department Breakdown</h3>
+            </div>
+            <table class="min-w-full divide-y divide-slate-200">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Dept</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Percentage</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Cost</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-slate-200">
+                    {% for dept in [
+                        ('FOH', 'foh'), 
+                        ('BOH', 'boh'), 
+                        ('RLT', 'rlt'), 
+                        ('CST', 'cst'),
+                        ('TRAINING', 'training'),
+                        ('EXECUTIVE', 'executive'),
+                        ('PARTNER', 'partner'),
+                        ('TERM', 'term')
+                    ] %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{{ dept[0] }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ time_punch_data[dept[1] + '_percentage'] }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{{ time_punch_data[dept[1] + '_cost'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
     {% endif %}
 
-    <form action="/form/upload/employee_birthday_report " method="POST" enctype="multipart/form-data">
-        <h2>Upload Employee Birthday Report</h2>
-        <input type="file" name="file"/>
-        <input type="hidden" value="{{ cfa_location.id }}" name="cfa_location_id" />
-        <input type="hidden" value="{{ session_key }}" name="session_key" />
-        <input type="submit"/>
-    </form>
+    <div class="bg-white shadow overflow-hidden rounded-lg">
+        <div class="px-4 py-5 sm:px-6 border-b border-slate-200">
+            <h3 class="text-lg leading-6 font-medium text-slate-900">Employee List</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Name</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Time Punch Name</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Birthday</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Department</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-slate-200">
+                    {% for employee in employees %}
+                    <tr class="employee-row hover:bg-slate-50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">
+                            {{ employee.name }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                            {{ employee.time_punch_name }}
+                            {% if employee.department == 'INIT' %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">*</span>
+                            {% endif %}    
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                            {{ employee.birthday }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                            <form method="post" action="/form/employee/update/department">
+                                <select name="department" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm rounded-md">
+                                    <option value="{{ employee.department }}" selected>{{ employee.department }}</option>
+                                    {% for dept_option in ['FOH', 'BOH', 'CST', 'RLT', 'TRAINING', 'EXECUTIVE', 'PARTNER', 'NONE'] %}
+                                        {% if dept_option != employee.department %}
+                                            <option value="{{ dept_option }}">{{ dept_option }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                                <input type="hidden" value="{{ cfa_location.id }}" name="location_id" />
+                                <input type="hidden" value="{{ employee.id }}" name="employee_id" />
+                                <input type="hidden" value="{{ session_key }}" name="session_key" />
+                                <input type="submit" style="display:none;" class="real-submit" /> 
+                            </form>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <input 
+                                class="submit-proxy cursor-pointer inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:bg-slate-300 disabled:cursor-not-allowed transition-all" 
+                                type="submit" 
+                                value="Update"
+                                disabled 
+                            /> 
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-    <form action="/form/upload/employee_bio" method="POST" enctype="multipart/form-data">
-        <h2>Upload Employee Bio</h2>
-        <input type="file" name="file"/>
-        <input type="hidden" value="{{ cfa_location.id }}" name="cfa_location_id" />
-        <input type="hidden" value="{{ session_key }}" name="session_key" />
-        <input type="submit"/>
-    </form>
+    <div class="mt-10 pt-10 border-t border-slate-200">
+        <h2 class="text-lg font-medium text-red-600 mb-4">Danger Zone</h2>
+        <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+            <h3 class="text-sm font-medium text-red-800">Delete CFA Location</h3>
+            <p class="mt-1 text-sm text-red-700">This action cannot be undone. Please type the location number to confirm.</p>
+            <form method="post" action="/form/cfa_location/delete/{{ cfa_location.id }}" class="mt-4 flex items-center gap-4">
+                <div>
+                    <label class="sr-only">location number</label>
+                    <input type="text" name="cfa_location_number" placeholder="Location #" class="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-slate-300 rounded-md" />
+                </div>
+                <input type="hidden" value="{{ session_key }}" name="session_key" />
+                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    Delete
+                </button>
+            </form>
+        </div>
+    </div>
 
-    <table>
-        <thead>
-            <th>Name</th>
-            <th>Time Punch Name</th>
-            <th>Birthday</th>
-            <th>Department</th>
-            <th>Submit</th>
-        </thead>
-        <tbody>
-            {% for employee in employees %}
-            <tr class="employee-row">
-                <td>
-                    {{ employee.name }}
-                </td>
-                <td>
-                    {{ employee.time_punch_name }}
-                    {% if employee.department == 'INIT' %}
-                        <span>*</span>
-                    {% endif %}    
-                </td>
-                <td>
-                    {{ employee.birthday }}
-                </td>
-                <td>
-                    <form method="post" action="/form/employee/update/department">
-                        <select name="department">
-                            <option>{{ employee.department }}</option>
-                            {% if employee.department == 'FOH' %}
-                            <option>BOH</option>
-                            <option>CST</option>
-                            <option>RLT</option>
-                            <option>NONE</option>
-                            {% elif employee.department == 'BOH' %}
-                            <option>FOH</option>
-                            <option>CST</option>
-                            <option>RLT</option>
-                            <option>NONE</option>
-                            {% elif employee.department == 'CST' %}
-                            <option>FOH</option>
-                            <option>BOH</option>
-                            <option>RLT</option>
-                            <option>NONE</option>
-                            {% elif employee.department == 'RLT' %}
-                            <option>FOH</option>
-                            <option>BOH</option>
-                            <option>CST</option>
-                            <option>NONE</option>
-                            {% else %}
-                            <option>FOH</option>
-                            <option>BOH</option>
-                            <option>CST</option>
-                            <option>RLT</option>
-                            <option>NONE</option>
-                            {% endif %}
-                        </select>
-                        <input type="hidden" value="{{ cfa_location.id }}" name="location_id" />
-                        <input type="hidden" value="{{ employee.id }}" name="employee_id" />
-                        <input type="hidden" value="{{ session_key }}" name="session_key" />
-                        <input type="submit" style="display:none;" class="real-submit" /> 
-                    </form>
-                </td>
-                <td>
-                    <input class="submit-proxy" type="submit" disabled /> 
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
+</div>
 
-    </table>
-
-    <script>
-        let rows = document.querySelectorAll('.employee-row')
-        for (let i = 0; i < rows.length; i++) {
-            let row = rows[i]
-            let form = row.querySelector('form')
-            let submitProxy = row.querySelector('.submit-proxy')
-            let realSubmit = row.querySelector('.real-submit')
-            form.addEventListener('change', () => {
-                submitProxy.removeAttribute('disabled')
-            })
-            submitProxy.addEventListener('click', () => {
-                realSubmit.click()
-            })
-        }
-    </script>
+<script>
+    let rows = document.querySelectorAll('.employee-row')
+    for (let i = 0; i < rows.length; i++) {
+        let row = rows[i]
+        let form = row.querySelector('form')
+        let submitProxy = row.querySelector('.submit-proxy')
+        let realSubmit = row.querySelector('.real-submit')
+        form.addEventListener('change', () => {
+            submitProxy.removeAttribute('disabled')
+            submitProxy.value = "Save Changes" // Visual feedback
+        })
+        submitProxy.addEventListener('click', () => {
+            realSubmit.click()
+        })
+    }
+</script>
 
 {% endblock %}

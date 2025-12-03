@@ -1,20 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full bg-slate-50">
 <head>
     {% block head %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock %} - CFA Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="/static/output.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
     {% endblock %}
 </head>
-<body>
-    <nav>
-        <ul>
+<body class="h-full flex flex-col">
+    <nav class="absolute w-full top-0 p-6">
+        <ul class="flex justify-end">
             <li>
-                <a href="/">Home</a>
+                <a href="/" class="text-sm font-medium text-slate-500 hover:text-slate-900">Home</a>
             </li>
         </ul>
     </nav>
-    <main>{% block content %}{% endblock %}</main>
+    <main class="flex-grow flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        {% block content %}{% endblock %}
+    </main>
 </body>
 </html>

@@ -35,17 +35,25 @@ class TimePunchReader:
 
         self.text = ""
 
+        # Cost buckets
         self.term_cost = Decimal(0)
         self.boh_cost = Decimal(0)
         self.cst_cost = Decimal(0)
         self.rlt_cost = Decimal(0)
         self.foh_cost = Decimal(0)
+        self.training_cost = Decimal(0)
+        self.executive_cost = Decimal(0)
+        self.partner_cost = Decimal(0)
 
+        # Percentage buckets
         self.term_percentage = 0
         self.boh_percentage = 0
         self.cst_percentage = 0
         self.rlt_percentage = 0
         self.foh_percentage = 0
+        self.training_percentage = 0
+        self.executive_percentage = 0
+        self.partner_percentage = 0
 
         self.total_hours = 0
         self.regular_hours = 0
@@ -165,32 +173,53 @@ class TimePunchReader:
             for current_employee in self.current_employees:
                 if time_punch_employee.name == current_employee.time_punch_name:
                     found = True
+                    # Check for specific departments (excluding NONE)
                     if current_employee.department == "BOH":
                         self.boh_cost += time_punch_employee.total_wages
-                    if current_employee.department == "FOH":
+                    elif current_employee.department == "FOH":
                         self.foh_cost += time_punch_employee.total_wages
-                    if current_employee.department == "CST":
+                    elif current_employee.department == "CST":
                         self.cst_cost += time_punch_employee.total_wages
-                    if current_employee.department == "RLT":
+                    elif current_employee.department == "RLT":
                         self.rlt_cost += time_punch_employee.total_wages
+                    elif current_employee.department == "TRAINING":
+                        self.training_cost += time_punch_employee.total_wages
+                    elif current_employee.department == "EXECUTIVE":
+                        self.executive_cost += time_punch_employee.total_wages
+                    elif current_employee.department == "PARTNER":
+                        self.partner_cost += time_punch_employee.total_wages
                     break
+            
+            # Logic for Terminated/Unmatched employees
             if found == False:
                 self.term_cost += time_punch_employee.total_wages
-        self.term_percentage = ((self.term_cost * 100) / self.total_wages).quantize(
-            Decimal("0.01"), rounding=ROUND_HALF_UP
-        )
-        self.foh_percentage = ((self.foh_cost * 100) / self.total_wages).quantize(
-            Decimal("0.01"), rounding=ROUND_HALF_UP
-        )
-        self.rlt_percentage = ((self.rlt_cost * 100) / self.total_wages).quantize(
-            Decimal("0.01"), rounding=ROUND_HALF_UP
-        )
-        self.cst_percentage = ((self.cst_cost * 100) / self.total_wages).quantize(
-            Decimal("0.01"), rounding=ROUND_HALF_UP
-        )
-        self.boh_percentage = ((self.boh_cost * 100) / self.total_wages).quantize(
-            Decimal("0.01"), rounding=ROUND_HALF_UP
-        )
+
+        # Calculate Percentages
+        if self.total_wages > 0:
+            self.term_percentage = ((self.term_cost * 100) / self.total_wages).quantize(
+                Decimal("0.01"), rounding=ROUND_HALF_UP
+            )
+            self.foh_percentage = ((self.foh_cost * 100) / self.total_wages).quantize(
+                Decimal("0.01"), rounding=ROUND_HALF_UP
+            )
+            self.rlt_percentage = ((self.rlt_cost * 100) / self.total_wages).quantize(
+                Decimal("0.01"), rounding=ROUND_HALF_UP
+            )
+            self.cst_percentage = ((self.cst_cost * 100) / self.total_wages).quantize(
+                Decimal("0.01"), rounding=ROUND_HALF_UP
+            )
+            self.boh_percentage = ((self.boh_cost * 100) / self.total_wages).quantize(
+                Decimal("0.01"), rounding=ROUND_HALF_UP
+            )
+            self.training_percentage = ((self.training_cost * 100) / self.total_wages).quantize(
+                Decimal("0.01"), rounding=ROUND_HALF_UP
+            )
+            self.executive_percentage = ((self.executive_cost * 100) / self.total_wages).quantize(
+                Decimal("0.01"), rounding=ROUND_HALF_UP
+            )
+            self.partner_percentage = ((self.partner_cost * 100) / self.total_wages).quantize(
+                Decimal("0.01"), rounding=ROUND_HALF_UP
+            )
 
     def __str__(self):
         lines = [
@@ -204,6 +233,9 @@ class TimePunchReader:
             f"  FOH: ${self.foh_cost} ({self.foh_percentage}%)",
             f"  CST: ${self.cst_cost} ({self.cst_percentage}%)",
             f"  RLT: ${self.rlt_cost} ({self.rlt_percentage}%)",
+            f"  TRAINING: ${self.training_cost} ({self.training_percentage}%)",
+            f"  EXECUTIVE: ${self.executive_cost} ({self.executive_percentage}%)",
+            f"  PARTNER: ${self.partner_cost} ({self.partner_percentage}%)",
             "",
             "Employees:",
         ]
@@ -216,11 +248,19 @@ class TimePunchReader:
             "rlt_cost": float(self.rlt_cost),
             "foh_cost": float(self.foh_cost),
             "term_cost": float(self.term_cost),
+            "training_cost": float(self.training_cost),
+            "executive_cost": float(self.executive_cost),
+            "partner_cost": float(self.partner_cost),
+            
             "boh_percentage": float(self.boh_percentage),
             "cst_percentage": float(self.cst_percentage),
             "rlt_percentage": float(self.rlt_percentage),
             "foh_percentage": float(self.foh_percentage),
             "term_percentage": float(self.term_percentage),
+            "training_percentage": float(self.training_percentage),
+            "executive_percentage": float(self.executive_percentage),
+            "partner_percentage": float(self.partner_percentage),
+
             "total_hours": str(self.total_hours),
             "regular_hours": str(self.regular_hours),
             "overtime_hours": str(self.overtime_hours),
