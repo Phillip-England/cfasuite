@@ -12,3 +12,4 @@ from .post_form_upload_employee_bio import *
 from .post_form_upload_employee_birthday_report import *
 from .post_form_upload_hotschedules_staff_html import *
 from .post_form_upload_time_punch import *
+from .post_tbot_birthday import *

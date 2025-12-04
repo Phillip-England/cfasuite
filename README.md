@@ -20,6 +20,8 @@ SQLITE_ABSOLUTE_PATH= ## where you want your sqlite.db to exist
 ADMIN_ID=99999999 ## a random number (preferable 1000000+)
 ADMIN_USERNAME=someusername ## a username for the admin user
 ADMIN_PASSWORD=somepassword ## a password for the admin user
+TBOT_KEY=some_key_required_to_use_bot_endpoints  ## choose carefully
+## *inserts env varibles for groupme bots*
 ```
 
 4. Init a virtual env
@@ -29,11 +31,12 @@ uv venv
 
 5. Install deps:
 ```bash
-uv pip install -r requirements.txt
+uv sync
 ```
 
 ## Running
 
 ```bash
 uv run uvicorn main:app --reload
+## or 'make run'
 ```
