@@ -19,7 +19,7 @@
                     <input type="file" name="file" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-50 file:text-slate-700 hover:file:bg-slate-100"/>
                     <input type="hidden" value="{{ cfa_location.id }}" name="cfa_location_id" />
                     <input type="hidden" value="{{ session_key }}" name="session_key" />
-                    <button type="submit" class="w-full bg-slate-800 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">Upload CSV</button>
+                    <button type="submit" class="w-full bg-slate-800 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">Upload PDF</button>
                 </form>
             </div>
         </div>
@@ -28,7 +28,7 @@
             <div class="px-4 py-5 sm:p-6">
                 <h2 class="text-lg font-medium leading-6 text-slate-900 mb-4">Upload HotSchedules</h2>
                 <form action="/form/upload/hotschedules_staff_html" method="POST" class="space-y-4">
-                    <textarea name="html" rows="3" class="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-slate-300 rounded-md" placeholder="Paste HTML here..."></textarea>
+                    <textarea name="html" rows="3" class="shadow-sm focus:ring-red-500 focus:border-red-500 block w-full sm:text-sm border-slate-300 rounded-md p-2" placeholder="Paste HTML here..."></textarea>
                     <input type="hidden" value="{{ cfa_location.id }}" name="cfa_location_id" />
                     <input type="hidden" value="{{ session_key }}" name="session_key" />
                     <button type="submit" class="w-full bg-slate-800 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500">Process HTML</button>

@@ -1,4 +1,3 @@
-from .bots import *
 from .config import *
 from .context import *
 from .db import *
