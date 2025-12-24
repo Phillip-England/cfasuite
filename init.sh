@@ -5,3 +5,4 @@ echo "ADMIN_USERNAME=cow" >> .env
 echo "ADMIN_PASSWORD=chicken" >> .env
 echo "TBOT_KEY=asdasdaqweqweqadas" >> .env
 mkdir static
+echo "@import 'tailwindcss';" >> ./static/input.css
